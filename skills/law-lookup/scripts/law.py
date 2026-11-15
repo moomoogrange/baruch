@@ -16,6 +16,7 @@ law-go-kr-obsidian(대한민국 법령 옵시디언 볼트, CC0)을 내려받아
   law.py live search 법령명              현행 법령 찾기 (MST, 공포일, 시행일)
   law.py live art 법령명 제32조          현행 조문. 가지번호도 그대로 (제18조의3)
   law.py live art 법령명 제32조 20240101  그날 시행 중이던 조문
+  law.py live arts 법령명 제32조 제33조 제49조   한 법령의 여러 조문을 한 번에 (서버 호출을 줄인다)
   law.py live annex 법령명 [별표번호]     별표·서식
   law.py live call 도구이름 '{"인자":"값"}'  그 밖의 도구 (live tools 로 목록)
 
@@ -336,6 +337,13 @@ def live(rest):
                 args["efYd"] = a[2]
             print(f"[현행 조회 · {title} · MST {mst}" + (f" · 기준일 {a[2]}" if len(a) >= 3 else "") + "]")
             print(live_call("get_law_text", args, sid))
+        elif sub == "arts" and len(a) >= 2:
+            sid = _session()
+            mst, title, _ = live_find(a[0], sid)
+            arts = [x if x.startswith("제") else f"제{x}조" for x in a[1:]]
+            print(f"[현행 조회 · {title} · MST {mst} · {len(arts)}개 조문]")
+            print(live_call("execute_tool", {"tool_name": "get_batch_articles",
+                                             "params": {"mst": mst, "articles": arts}}, sid))
         elif sub == "annex" and a:
             args = {"lawName": a[0]}
             if len(a) >= 2:

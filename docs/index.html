@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>바룩 — 법무사·행정사 없이 서류를 직접 냅니다</title>
-<meta name="description" content="등기, 인허가, 변경신고, 처분 불복, 소송 서류까지. 바룩이 절차를 짚고 초안을 쓰고, 내기 전에 두 번 더 봅니다. 무료, 오픈소스 Claude Code 플러그인.">
-<meta property="og:title" content="바룩 — 법무사·행정사 없이 서류를 직접 냅니다">
-<meta property="og:description" content="등기, 인허가, 변경신고, 처분 불복, 소송 서류까지 본인이 직접. 무료, 오픈소스.">
+<title>바룩, 법무사·행정사 없이 서류를 직접 내는 도구</title>
+<meta name="description" content="등기, 인허가, 변경신고, 처분 불복, 소송 서류를 본인이 직접 내도록 돕습니다. 바룩이 절차를 찾아 초안을 쓰고 내기 전에 두 번 더 봅니다. Claude Code에서 쓰는 무료 오픈소스 플러그인입니다.">
+<meta property="og:title" content="바룩, 법무사·행정사 없이 서류를 직접 내는 도구">
+<meta property="og:description" content="등기, 인허가, 변경신고, 처분 불복, 소송 서류를 본인이 직접 내도록 돕는 무료 오픈소스 도구입니다.">
 <link rel="icon" href="tiles/b-07.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -187,7 +187,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
 <header class="top"><div class="wrap">
   <a class="brand" href="#"><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-07"/></svg>바룩</a>
   <nav aria-label="쪽 안 이동">
-    <a href="#work">다루는 일</a><a href="#flow">일하는 순서</a><a href="#back">돌아오지 않게</a><a href="#law">법령</a><a href="#install">설치</a><a href="#story">만든 이야기</a>
+    <a href="#work">다루는 일</a><a href="#flow">일하는 순서</a><a href="#back">내기 전 검토</a><a href="#law">법령</a><a href="#install">설치</a><a href="#story">만든 이야기</a>
   </nav>
   <a class="get" href="#install">설치하기</a>
 </div></header>
@@ -196,8 +196,8 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
 <div class="hero"><div class="wrap">
   <div>
     <div class="tag"><span>버전 1.0</span><span>무료</span><span>오픈소스</span></div>
-    <h1>법무사·행정사 없이,<br>서류를 직접 냅니다.</h1>
-    <p class="lead">등기, 인허가, 변경신고, 처분 불복, 소송 서류까지. 바룩이 절차를 짚고 초안을 쓰고, 내기 전에 두 번 더 봅니다. 서명하고 내는 일만 직접 하시면 됩니다.</p>
+    <h1>법무사·행정사 없이<br>서류를 직접 냅니다.</h1>
+    <p class="lead">등기, 인허가, 변경신고, 처분 불복, 소송 서류를 직접 내실 수 있게 돕습니다. 바룩이 절차를 찾아 초안을 쓰고 내기 전에 두 번 더 봅니다. 서명하고 내는 일만 직접 하시면 됩니다.</p>
     <div class="btns">
       <a class="btn fill" href="#install">설치하기</a>
       <a class="btn" href="https://github.com/moomoogrange/baruch">GitHub에서 보기</a>
@@ -216,8 +216,8 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
 
 <section id="work"><div class="wrap">
   <p class="kicker">다루는 일</p>
-  <h2>관청에 내는 일과<br>법원·등기소에 내는 일.</h2>
-  <p class="sub">사정을 말하면 걸리는 신청을 모두 찾아 순서를 정합니다. 가게 이름 하나를 바꿔도 영업신고, 사업자등록, 법인등기가 함께 걸립니다.</p>
+  <h2>관청 서류와 법원·등기소 서류를<br>모두 다룹니다.</h2>
+  <p class="sub">사정을 말씀하시면 해야 하는 신청을 모두 찾아 순서를 정합니다. 가게 이름 하나만 바꿔도 영업신고, 사업자등록, 법인등기를 함께 고쳐야 합니다.</p>
   <div class="two">
     <div>
       <h3>관청에 내는 일</h3>
@@ -244,7 +244,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
       </ul>
     </div>
   </div>
-  <p class="note">목록에 없는 신청도 같은 순서로 근거 법령부터 찾아 처리합니다. 공문이 여러 번 오가는 일은 사건으로 묶어 받은 공문, 기한, 낸 서류, 접수증을 끝까지 챙깁니다.</p>
+  <p class="note">목록에 없는 신청도 같은 순서로 근거 법령부터 찾아 처리합니다. 공문이 여러 번 오가는 일은 사건 하나로 묶어서, 받은 공문과 기한, 낸 서류와 접수증을 끝날 때까지 관리합니다.</p>
 </div></section>
 
 <section id="flow" class="tint"><div class="wrap">
@@ -252,14 +252,14 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
   <h2>어떤 일이든 같은 순서로 합니다.</h2>
   <div class="flow">
     <ol class="steps">
-      <li><b>사정을 듣습니다</b><span>걸리는 신청을 모두 찾고 순서를 정합니다.</span></li>
-      <li><b>법령에서 근거, 내는 곳, 서식, 기한을 찾습니다</b><span>기억으로 말하지 않고 그날의 조문을 읽습니다.</span></li>
-      <li><b>먼저 들러야 하는 곳을 찾습니다</b><span>등기 전에 관청에서 받아야 하는 확인서 같은 것입니다.</span></li>
-      <li><b>초안을 씁니다</b><span>모르는 것은 지어내지 않고 빈칸으로 남겨 여쭙니다.</span></li>
-      <li><b>담당자가 물을 것에 미리 답합니다</b><span>접수 창구, 담당 주무관, 등기관, 재판부 자리에서 질문을 뽑습니다.</span></li>
-      <li><b>다른 둘이 따로 검토합니다</b><span>쓴 사람은 자기 글의 틀린 곳을 잘 못 봅니다.</span></li>
-      <li><b>낼 꼴로 만듭니다</b><span>첨부는 PDF로, 화면에 붙여 넣을 글과 할 일 목록을 함께 드립니다.</span></li>
-      <li><b>내고 나서 적어 둡니다</b><span>접수번호, 기한, 보완 요구, 뒤따르는 신고.</span></li>
+      <li><b>사정을 듣습니다</b><span>해야 하는 신청을 빠짐없이 찾고 무엇부터 낼지 정합니다.</span></li>
+      <li><b>법령에서 근거, 내는 곳, 서식, 기한을 찾습니다</b><span>기억나는 대로 쓰지 않고 조회하는 날의 조문을 읽습니다.</span></li>
+      <li><b>먼저 들러야 하는 곳을 찾습니다</b><span>등기 전에 관청에서 확인서를 받아 와야 하는 경우가 있어서입니다.</span></li>
+      <li><b>초안을 씁니다</b><span>모르는 내용은 지어내지 않고 빈칸으로 남긴 뒤 여쭤봅니다.</span></li>
+      <li><b>담당자가 물을 것에 미리 답합니다</b><span>접수 창구, 담당 주무관, 등기관, 재판부라면 무엇을 물을지 뽑아 봅니다.</span></li>
+      <li><b>다른 둘이 따로 검토합니다</b><span>쓴 사람은 자기 글에서 틀린 곳을 잘 못 찾습니다.</span></li>
+      <li><b>제출용으로 만듭니다</b><span>첨부 서류는 PDF로 만들고, 화면에 붙여 넣을 글과 할 일 목록을 같이 드립니다.</span></li>
+      <li><b>내고 나서 적어 둡니다</b><span>접수번호, 기한, 보완 요구, 뒤따르는 신고를 남깁니다.</span></li>
     </ol>
     <figure>
       <div class="shot"><img src="img/sample-jeonggwan.png" alt="바룩이 만든 사단법인 정관 초안의 첫 쪽. 채울 자리가 노랗게 칠해져 있고 쪽 가운데에 초안 표시가 있다." width="756" height="704" loading="lazy"></div>
@@ -269,19 +269,19 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
 </div></section>
 
 <section id="back"><div class="wrap">
-  <p class="kicker">돌아오지 않게</p>
-  <h2>등기소에서, 창구에서<br>되돌아오는 일을 줄입니다.</h2>
-  <p class="sub">서류는 한 번에 받아들여지지 않는 것이 보통입니다. 바룩은 내기 전에 그 까닭을 먼저 찾습니다.</p>
+  <p class="kicker">내기 전 검토</p>
+  <h2>등기소나 창구에서<br>되돌아오는 일을 줄입니다.</h2>
+  <p class="sub">서류는 한 번에 받아들여지지 않을 때가 많습니다. 바룩은 되돌아올 까닭을 내기 전에 찾아봅니다.</p>
   <div class="three">
-    <div><h3>등기 전에 들를 곳</h3><div><p>농업회사법인은 변경등기 전에 시·군·구에 먼저 신고하고 신고확인증을 받아야 합니다. 사단법인은 정관을 바꿀 때 주무관청 허가가 먼저입니다. 법인 종류마다 이런 것이 있습니다.</p><p>바룩은 법인의 근거 법령에서 등기 전에 받아야 하는 서류를 찾아 먼저 알려 드립니다.</p></div></div>
-    <div><h3>놓치고 있던 등기</h3><div><p>대표자가 이사를 하면 변경등기를 해야 합니다. 임원 임기가 끝나면 같은 사람이 계속해도 다시 등기해야 합니다. 기한을 넘기면 대표자에게 과태료가 나옵니다.</p><p>등기부를 읽고 지금 사실과 견주어 빠진 등기를 찾고, 임기 달력을 만들어 드립니다.</p></div></div>
-    <div><h3>신청서 대조</h3><div><p>등기관은 신청서와 붙인 서류를 글자 단위로 맞춰 봅니다. 주소 표기, 날짜, 취임과 중임의 구분, 첨부 서류의 통수에서 보정이 나옵니다.</p><p>신청서를 칸마다 등기부, 정관, 의사록과 대조합니다.</p></div></div>
-    <div><h3>담당자가 물을 것</h3><div><p>허가 담당 주무관은 "왜 우리 소관인가", "이 예산의 근거가 무엇인가"를 묻습니다. 질문을 미리 뽑아 답과 증빙을 채우고, 답이 없는 질문이 남으면 내지 말라고 말씀드립니다.</p></div></div>
+    <div><h3>등기 전에 들를 곳</h3><div><p>농업회사법인은 변경등기 전에 시·군·구에 먼저 신고하고 신고확인증을 받아야 합니다. 사단법인이 정관을 바꿀 때는 주무관청 허가부터 받습니다. 법인 종류마다 이런 절차가 따로 있습니다.</p><p>바룩은 법인의 근거 법령에서 등기 전에 받아야 하는 서류를 찾아 먼저 알립니다.</p></div></div>
+    <div><h3>놓치고 있던 등기</h3><div><p>대표자가 이사를 하면 변경등기를 해야 하고, 임원 임기가 끝나면 같은 사람이 계속 맡더라도 다시 등기해야 합니다. 기한을 넘기면 대표자에게 과태료가 나옵니다.</p><p>바룩은 등기부를 지금 사실과 비교해 빠진 등기를 찾고 임기 달력을 만듭니다.</p></div></div>
+    <div><h3>신청서 대조</h3><div><p>등기관은 신청서와 붙인 서류를 글자 단위로 맞춰 봅니다. 보정은 주소 표기, 날짜, 취임과 중임의 구분, 첨부 서류의 통수에서 나옵니다.</p><p>그래서 신청서를 한 칸씩 등기부, 정관, 의사록과 대조합니다.</p></div></div>
+    <div><h3>담당자가 물을 것</h3><div><p>허가 담당 주무관은 "왜 우리 소관인가", "이 예산의 근거가 무엇인가"를 묻습니다. 이런 질문을 미리 뽑아 답과 증빙을 채웁니다. 답하지 못한 질문이 남아 있으면 아직 내지 마시라고 말씀드립니다.</p></div></div>
   </div>
   <div class="eyes">
-    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-06"/></svg><em>쓰는 이</em><h3>바룩</h3><p>듣고, 순서를 짜고, 서류를 씁니다. 지적을 받으면 고칩니다.</p></div>
-    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-08"/></svg><em>대조하는 이</em><h3>사반</h3><p>서류를 조문, 들은 사실, 다른 서류와 한 글자씩 맞춰 봅니다. 고치지 않고 틀린 곳만 알립니다.</p></div>
-    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-12"/></svg><em>받는 쪽에 앉는 이</em><h3>나단</h3><p>담당 공무원, 등기관, 재판부, 상대방 자리에 앉아 이 서류를 왜 받아 줄 수 없는지 먼저 찾습니다.</p></div>
+    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-06"/></svg><em>쓰는 역할</em><h3>바룩</h3><p>사정을 듣고 순서를 정해 서류를 씁니다. 지적받은 곳도 바룩이 고칩니다.</p></div>
+    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-08"/></svg><em>대조하는 역할</em><h3>사반</h3><p>서류를 조문, 들은 사실, 다른 서류와 한 글자씩 맞춰 봅니다. 직접 고치지는 않고 틀린 곳만 알립니다.</p></div>
+    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-12"/></svg><em>받는 쪽 역할</em><h3>나단</h3><p>담당 공무원, 등기관, 재판부, 상대방의 입장에서 이 서류를 받아 줄 수 없는 이유를 찾습니다.</p></div>
   </div>
 </div></section>
 
@@ -294,9 +294,9 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
     <div>
       <ul class="plain">
         <li><b>현행 조문을 조회합니다.</b> 법제처 Open API로 조회하는 날의 조문을 읽고 시행일과 함께 적습니다.</li>
-        <li><b>지난 일은 그날의 조문으로.</b> 이미 받은 처분이나 오래된 허가는 그때 시행 중이던 조문을 따로 읽습니다.</li>
+        <li><b>지난 일은 그때의 조문을 봅니다.</b> 이미 받은 처분이나 오래된 허가는 당시 시행 중이던 조문을 따로 찾아 읽습니다.</li>
         <li><b>서식과 조례도 찾습니다.</b> 별지 서식, 별표, 자치법규, 해석례까지 조회합니다.</li>
-        <li><b>모르면 모른다고 적습니다.</b> 관청 내부 기준처럼 어디에도 없는 것은 "관청 확인"으로 표시하고 물어볼 말을 써 드립니다.</li>
+        <li><b>모르면 모른다고 적습니다.</b> 관청 내부 기준처럼 어디에도 나와 있지 않은 것은 "관청 확인"으로 표시하고 관청에 물어볼 말을 함께 씁니다.</li>
       </ul>
     </div>
     <pre><i>$ law.py live art 민법 제32조</i>
@@ -317,29 +317,29 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
   <h2>할 수 없는 일은 먼저 말씀드립니다.</h2>
   <div class="not">
     <div><b>대신 내지 않습니다</b><span>서명, 날인, 본인 인증, 제출은 본인이 합니다. 단체의 일은 대표자 이름으로 냅니다.</span></div>
-    <div><b>법정에 나가지 않습니다</b><span>서류는 돕지만 변론은 본인이나 변호사가 합니다. 상대가 다투는 복잡한 사건은 변호사에게 가시라고 말합니다.</span></div>
+    <div><b>법정에 나가지 않습니다</b><span>서류 작성은 돕지만 변론은 본인이나 변호사가 합니다. 상대가 다투는 복잡한 사건은 변호사에게 가시라고 말합니다.</span></div>
     <div><b>결과를 보장하지 않습니다</b><span>허가, 등기, 판결은 관청과 등기소와 법원이 정합니다.</span></div>
-    <div><b>크고 되돌릴 수 없는 일은 전문가를 권합니다</b><span>대금과 맞바꾸는 부동산 등기, 큰 금액의 가압류, 며칠 남지 않은 불복 기한. 만든 서류 묶음을 그대로 넘기면 됩니다.</span></div>
-    <div><b>남의 일을 돈 받고 해 주는 데 쓰지 않습니다</b><span>그 일에는 행정사·법무사·변호사 자격이 필요합니다. 바룩은 자기 일을 직접 하는 분을 위한 도구입니다.</span></div>
-    <div><b>다루지 않는 일</b><span>형사 사건, 세무 조정, 노무 분쟁, 특허.</span></div>
+    <div><b>크고 되돌릴 수 없는 일은 전문가를 권합니다</b><span>대금과 맞바꾸는 부동산 등기, 큰 금액의 가압류, 불복 기한이 며칠 남지 않은 일이 그렇습니다. 그때는 만든 서류 묶음을 전문가에게 그대로 넘기시면 됩니다.</span></div>
+    <div><b>남의 일을 돈 받고 해 주는 데 쓰지 않습니다</b><span>그 일에는 행정사·법무사·변호사 자격이 필요합니다. 바룩은 자기 일을 직접 하시는 분이 쓰는 도구입니다.</span></div>
+    <div><b>다루지 않는 일도 있습니다</b><span>형사 사건, 세무 조정, 노무 분쟁, 특허는 다루지 않습니다.</span></div>
   </div>
 </div></section>
 
 <section id="private" class="tint"><div class="wrap">
   <p class="kicker">개인정보</p>
   <h2>서류는 내 컴퓨터에 남습니다.</h2>
-  <p class="sub">바룩에는 서버도 계정도 없습니다. 만든 서류는 작업 폴더에만 저장됩니다. 법령을 조회할 때는 법령 이름과 조 번호만 보내고, 이름이나 주소는 보내지 않습니다. 주민등록번호는 받지 않고, 낼 때 직접 적도록 빈칸으로 둡니다. 대화 내용은 쓰고 계신 Claude의 약관을 따릅니다.</p>
+  <p class="sub">바룩에는 서버도 계정도 없어서 만든 서류는 작업 폴더에만 저장됩니다. 법령을 조회할 때 보내는 것은 법령 이름과 조 번호뿐이고, 이름이나 주소는 보내지 않습니다. 주민등록번호는 받지 않으며 낼 때 직접 적으시도록 빈칸으로 둡니다. 대화 내용은 쓰고 계신 Claude의 약관을 따릅니다.</p>
 </div></section>
 
 <section id="install"><div class="wrap">
   <p class="kicker">설치</p>
-  <h2>두 줄이면 됩니다.</h2>
+  <h2>두 줄로 설치합니다.</h2>
   <div class="inst">
     <div>
       <h3>Claude Code에 입력합니다</h3>
       <pre>/plugin marketplace add moomoogrange/baruch
 /plugin install baruch@baruch</pre>
-      <p class="note">설치할 때 법제처 인증키를 묻습니다. 비워 두셔도 됩니다. PDF를 만들려면 크롬이나 엣지가 깔려 있어야 합니다.</p>
+      <p class="note">설치할 때 법제처 인증키를 묻는데 비워 두셔도 됩니다. PDF를 만들려면 크롬이나 엣지가 깔려 있어야 합니다.</p>
     </div>
     <div>
       <h3>그다음 말로 하시면 됩니다</h3>
@@ -358,23 +358,23 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
   <p class="kicker">만든 이야기</p>
   <h2>보정 요청을 수십 번 받았습니다.</h2>
   <div class="story">
-    <p>2013년에 협동조합 법인을 세우면서부터 법무사나 행정사 없이 법인 등기를 하나하나 직접 해 왔습니다. 보정 요청을 수십 번 받았습니다.</p>
-    <p>대표자가 주소를 옮기면 변경등기를 해야 한다는 것을 그렇게 알았습니다. 임기가 끝났는데 중임 등기를 하지 않아 과태료를 낸 적도 있습니다.</p>
-    <p>서울에 있을 때보다 시골에 내려오니 서류 일이 더 많습니다. 축산업 인허가, 해썹 인증, 유기축산 인증까지, 이제는 에이전트 도움 없이는 하기 어렵습니다.</p>
-    <p>혼자 풀면서 배운 것이 많습니다. 다른 대표님들도 법무사나 행정사 없이 직접 하실 수 있게 돕고 싶어서 바룩을 만들었습니다.</p>
+    <p>2013년에 협동조합 법인을 세우면서부터 행정사나 법무사 없이 법인 등기를 하나하나 직접 해 왔습니다. 그러는 동안 보정 요청을 수십 번 받았습니다.</p>
+    <p>대표자가 주소를 옮기면 변경등기를 해야 한다는 것도 그러면서 배웠습니다. 임기가 만료됐는데 중임이나 신규 등기를 하지 않아서 과태료를 낸 적도 있습니다.</p>
+    <p>서울에 있을 때와 달리 시골에 내려와서는 이런 에이전트 없이 일하기가 어렵습니다. 축산업 신규 인허가, 해썹 인증, 유기축산 인증 같은 서류를 이제는 에이전트 도움 없이 하기 힘듭니다.</p>
+    <p>혼자 해결하다 보니 다른 대표님들도 법무사나 행정사 없이 직접 하실 수 있게 돕고 싶어졌습니다. 그래서 바룩을 만들었습니다.</p>
     <cite>무무목장 대표</cite>
   </div>
 </div></section>
 
 <section id="thanks"><div class="wrap">
-  <p class="kicker">함께 쓴 것</p>
-  <h2>남이 만든 것 위에서 만들었습니다.</h2>
+  <p class="kicker">만든 것과 빌려 쓴 것</p>
+  <h2>법령 조회 서버 하나만 빌려 썼습니다.</h2>
   <ul class="thanks">
-    <li><a href="https://github.com/chrisryugj/korean-law-mcp">korean-law-mcp</a><span>류주임이 만든 법령 조회 서버입니다. 법제처 Open API로 현행 조문, 서식, 조례, 판례를 읽습니다. MIT.</span></li>
-    <li><a href="https://github.com/moomoogrange/law-go-kr-obsidian">law-go-kr-obsidian</a><span>대한민국 법령 3,037건을 내려받아 넓게 찾을 때 씁니다. CC0.</span></li>
-    <li><a href="https://www.easylaw.go.kr">찾기 쉬운 생활법령정보</a><span>법제처가 생활 중심으로 풀어 쓴 안내서입니다. 비영리 사단법인 절차의 요점을 참고했습니다.</span></li>
-    <li>무무 타일 시스템<span>이 쪽의 그림은 무무목장 사이트의 타일 규칙으로 그렸습니다. 포르투 시 아이덴티티 「Porto.」와 같은 방식입니다.</span></li>
+    <li><a href="https://github.com/chrisryugj/korean-law-mcp">korean-law-mcp</a><span>류주임이 만든 법령 조회 서버로, 법제처 Open API에서 현행 조문, 서식, 조례, 판례를 읽어 옵니다. 바룩에서 남이 만든 것은 이것 하나뿐입니다. 라이선스는 MIT입니다.</span></li>
+    <li><a href="https://github.com/moomoogrange/law-go-kr-obsidian">law-go-kr-obsidian</a><span>대한민국 법령 3,037건을 저장소 하나에 옮겨 둔 것입니다. 직접 만들었고, 여러 법령을 넓게 찾을 때 씁니다. 라이선스는 CC0입니다.</span></li>
+    <li>무무 타일 시스템<span>이 쪽의 그림은 무무목장 사이트에 쓰려고 직접 만든 타일 규칙으로 그렸습니다.</span></li>
   </ul>
+  <p class="note">비영리 사단법인 절차는 법제처 <a href="https://www.easylaw.go.kr">찾기 쉬운 생활법령정보</a>를 참고했습니다.</p>
 </div></section>
 </main>
 
@@ -385,7 +385,7 @@ footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
     <a href="https://github.com/moomoogrange/baruch/blob/main/LICENSE">라이선스 (MIT)</a>
     <a href="https://moomooranch.net">무무목장</a>
   </nav>
-  <p>바룩은 무료이며 보증하지 않습니다. 법률 자문이 아닙니다. 업무 안내는 작성일의 조문을 읽고 쓴 출발점이며, 내기 전에 현행 조문과 관청 안내를 확인하셔야 합니다.</p>
+  <p>바룩은 무료로 쓰실 수 있지만 보증은 없고, 법률 자문도 아닙니다. 업무 안내는 작성일의 조문을 읽고 쓴 참고 자료이므로 내기 전에 현행 조문과 관청 안내를 확인하셔야 합니다.</p>
   <p>바룩은 예레미야의 서기관입니다. 불러 주는 말을 받아 적어 문서로 만들었고, 땅을 산 증서를 봉인해 보관했습니다.</p>
 </div></footer>
 </body>

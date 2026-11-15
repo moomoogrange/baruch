@@ -27,11 +27,14 @@ law.py live search 비영리법인 설립                 # 현행 법령 찾기
 law.py live art 민법 제32조                        # 현행 조문
 law.py live art "법인세법 시행규칙" 제18조의3        # 가지번호 그대로
 law.py live art 법인세법 제24조 20240101            # 그날 시행 중이던 조문
+law.py live arts 민법 제32조 제33조 제49조          # 한 법령의 여러 조문을 한 번에
 law.py live annex "법인세법 시행규칙" 63의5          # 별표·서식
 law.py live tools                                  # 쓸 수 있는 도구 목록
 law.py live call search_decisions '{"domain":"interpretation","query":"비영리법인 주무관청"}'   # 해석례·판례
 ```
 
+- 같은 법령의 조문을 여럿 읽을 때는 `live arts`로 한 번에 읽는다. 공용 서버이므로 호출 수를 아낀다.
+- `live annex`의 목록은 20건까지만 보인다. 서식이 많은 법령은 서식 번호를 붙여 조회한다.
 - 인증키 없이 공용 한도로 동작한다. 자주 쓰면 [법제처 Open API](https://open.law.go.kr)에서 무료 인증키(OC)를 받아 플러그인 설정에 넣거나 `LAW_OC` 환경변수로 준다.
 - 조회 내용은 공개 서버(mcp.gomdori.app)를 거쳐 법제처로 간다. 법령 이름과 조 번호만 보낸다. **신청인의 이름·주소 같은 개인정보를 조회어에 넣지 않는다.**
 - 결과에 `[NOT_FOUND]`가 나오거나 서버에 닿지 못하면 지어내지 않는다. ②로 읽고 "현행 확인 못 함"이라고 적는다.
