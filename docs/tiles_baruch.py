@@ -1,9 +1,9 @@
 """바룩 타일 — 무무 타일 시스템(포르투 방식)의 규칙으로 그린 서류 도구 묶음.
-96×96 판, 8px 칸. 면만 쓴다(외곽선·그러데이션·그림자·글자 없음). 색은 무무 팔레트의 만들기 무리만.
+96×96 판, 8px 칸. 면만 쓴다(외곽선·그러데이션·그림자·글자 없음). 색은 다섯 가지만: 종이색, 먹남색 둘, 옅은 남색, 인주색.
 실행: python3 docs/tiles_baruch.py  →  docs/tiles/b-NN.svg, docs/tiles.svg(스프라이트)"""
 import os, re
 HERE = os.path.dirname(os.path.abspath(__file__))
-BG, D, M, L, Pa = '#F7F2E6', '#2C6349', '#43825E', '#8FCB77', '#BEE0AA'
+BG, D, M, L, Pa = '#F7F5F1', '#1E2A44', '#3D4C6E', '#C4452F', '#C9D2E4'   # 종이, 먹남색, 중간 남색, 인주색, 옅은 남색
 PAL = {BG, D, M, L, Pa}
 def R(x, y, w, h, c, rx=0, rot=None):
     t = f' transform="rotate({rot[0]} {rot[1]} {rot[2]})"' if rot else ''

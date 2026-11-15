@@ -21,14 +21,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
-/* 무무 타일 시스템(포르투 방식)의 토큰을 그대로 쓴다 */
+/* 먹남색과 인주색. 타일 놓는 법과 글꼴은 무무 타일 시스템(포르투 방식)을 따른다 */
 :root{
-  --a1:#2C6349;--a2:#43825E;--a3:#6FA98B;--a4:#A2CCB6;--a5:#D0E5D9;
-  --b1:#43843A;--b2:#63A94F;--b3:#8FCB77;--b4:#BEE0AA;--b5:#E4F2D8;
-  --c1:#2A6A7A;--c2:#3C8B9C;--c3:#6FB6C4;--c4:#ABD7E0;--c5:#DCEDF1;
-  --paper:#F7F2E6;
-  --ink:var(--a1);--dim:#34694B;--faint:#3D7356;
-  --rule:rgba(44,99,73,.16);--rule2:rgba(44,99,73,.32);
+  --a1:#1E2A44;--a2:#3D4C6E;--a3:#8090B2;--a4:#B6C1D8;--a5:#DEE3EE;
+  --b1:#43843A;--b2:#63A94F;--b3:#C4452F;--b4:#C9D2E4;--b5:#E9ECF3;
+  --c1:#2A6A7A;--c2:#3C8B9C;--c3:#6FB6C4;--c4:#ABD7E0;--c5:#E2E6EE;
+  --paper:#F7F5F1;
+  --ink:var(--a1);--dim:#34425F;--faint:#4B5978;
+  --rule:rgba(30,42,68,.16);--rule2:rgba(30,42,68,.32);
   --title:'Gowun Dodum',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',Roboto,sans-serif;
   --body:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
@@ -45,7 +45,7 @@ p{margin:0}
 .skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;padding:8px;z-index:9}
 
 /* 머리 */
-.top{position:sticky;top:0;z-index:5;background:rgba(247,242,230,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.top{position:sticky;top:0;z-index:5;background:rgba(247,245,241,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
 .top .wrap{display:flex;align-items:center;gap:16px;height:56px}
 .brand{display:flex;align-items:center;gap:8px;font-family:var(--title);font-size:1.25rem;text-decoration:none}
 .brand svg{width:28px;height:28px;border-radius:4px}
@@ -131,8 +131,8 @@ figcaption{font-size:.8125rem;color:var(--faint);margin-top:10px}
 /* 법령 */
 .law{display:grid;gap:36px;margin-top:36px;align-items:start;grid-template-columns:minmax(0,1fr)}
 @media(min-width:900px){.law{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px}}
-pre{margin:0;background:var(--a1);color:#EAF3EC;border-radius:var(--r3);padding:20px 22px;font-family:var(--mono);font-size:.8125rem;line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
-pre i{font-style:normal;color:var(--b3)}
+pre{margin:0;background:var(--a1);color:#EEF1F6;border-radius:var(--r3);padding:20px 22px;font-family:var(--mono);font-size:.8125rem;line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+pre i{font-style:normal;color:#E8B4A8}
 .plain{list-style:none;margin:0;padding:0}
 .plain li{padding:12px 0;border-bottom:1px solid var(--rule);color:var(--dim)}
 .plain li b{color:var(--ink);font-weight:600}
@@ -161,7 +161,7 @@ pre i{font-style:normal;color:var(--b3)}
 .thanks li{padding:14px 0;border-bottom:1px solid var(--rule);display:grid;gap:2px 24px}
 @media(min-width:820px){.thanks li{grid-template-columns:260px 1fr}}
 .thanks span{color:var(--dim);font-size:.9375rem}
-footer{background:var(--a1);color:#DDEBE0;padding:44px 0;font-size:.875rem}
+footer{background:var(--a1);color:#DEE3EE;padding:44px 0;font-size:.875rem}
 footer a{color:#fff}
 footer .wrap{display:grid;gap:18px}
 footer p{max-width:52em;line-height:1.8}
