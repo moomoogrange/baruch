@@ -33,6 +33,17 @@ g("sinmungo", "국민신문고로 질의하고 신청하기", "skills/nonprofit-
 g("admin-affairs", "관청에 내는 일 — 영역과 고르는 법", "skills/admin-affairs/SKILL.md")
 g("judicial-affairs", "법원·등기소에 내는 일 — 영역과 고르는 법", "skills/judicial-affairs/SKILL.md")
 g("nonprofit", "비영리 사단법인 설립과 기부금영수증 — 전체 순서", "skills/nonprofit-incorporation/SKILL.md")
+CHAT_BUILDING = ("대화창에서는 `arch.py` 대신 **`building_lookup` 도구**를 쓴다. what에 profile · history · floors · temp 가운데 하나를 넣는다. "
+                 "동 단위 통계 같은 다른 조회와 원본 행(`raw`)은 대화창에서 되지 않는다. 아래에서 `arch.py …`라고 적힌 곳은 그 도구로 읽는다.\n\n---\n\n")
+CHAT_DRAWING = ("대화창에서는 `draw.py` 대신 **`drawing_example`과 `drawing_make` 도구**를 쓴다. 보기 내용을 받아 신청인의 값으로 바꾼 뒤 `drawing_make`의 spec으로 넘기면 SVG가 온다. "
+                "받은 SVG는 고치지 말고 그대로 파일로 만들어 보여 준다. PDF와 PNG는 만들어지지 않으니 신청인이 SVG를 브라우저로 열어 A4 가로, 여백 없음으로 인쇄해 PDF로 저장하게 한다. "
+                "경사는 `slope_reference` 도구가 숫자만 돌려준다(그림 없음). "
+                "**필지 경계 받기(`parcel.py`), 대장 면적 받기, 바탕 지도는 대화창에서 되지 않는다.** 본인 브이월드 인증키가 필요해서 Claude Code 플러그인에서만 쓴다. "
+                "대화창에서는 대지경계와 대지면적을 신청인이 뗀 지적도·토지대장에서 읽어 직접 적고, 기존 건물의 `대장면적`은 `building_lookup`이나 건축물대장 등본에서 읽어 적는다.\n\n---\n\n")
+guides["building"] = {"title": "건축물대장 조회 — 무엇을 볼 수 있고 무엇을 볼 수 없는지",
+                      "text": CHAT_BUILDING + strip_front((ROOT / "skills/building-lookup/SKILL.md").read_text(encoding="utf-8"))}
+guides["drawing"] = {"title": "배치도·평면도 그리기 — 그리기 전에 받을 것, 적는 칸",
+                     "text": CHAT_DRAWING + strip_front((ROOT / "skills/site-drawing/SKILL.md").read_text(encoding="utf-8"))}
 for f in sorted((ROOT / "skills/nonprofit-incorporation/references").glob("*.md")):
     if f.stem in ("보완-예방", "국민신문고"):
         continue
@@ -47,6 +58,9 @@ for f in sorted((ROOT / "skills/nonprofit-incorporation/templates").glob("*.md")
     templates[f.stem] = f.read_text(encoding="utf-8").strip()
 rules = (ROOT / "mcp/chat-rules.md").read_text(encoding="utf-8").strip()
 ver = json.loads((ROOT / ".claude-plugin/plugin.json").read_text())["version"]
-out = {"version": ver, "rules": rules, "areas": areas, "guides": guides, "templates": templates}
+import sys
+sys.path.insert(0, str(ROOT / "skills/site-drawing/scripts"))
+from draw import EXAMPLES
+out = {"version": ver, "rules": rules, "areas": areas, "guides": guides, "templates": templates, "drawingExamples": EXAMPLES}
 (ROOT / "mcp/content.json").write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
 print("영역", len(areas), "카드", sum(len(a["cards"]) for a in areas), "안내", len(guides), "틀", len(templates), (ROOT / "mcp/content.json").stat().st_size // 1024, "KB")

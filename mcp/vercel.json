@@ -1,4 +1,7 @@
 {
   "rewrites": [{ "source": "/mcp", "destination": "/api/mcp" }],
-  "functions": { "api/mcp.js": { "maxDuration": 60, "includeFiles": "content.json" } }
+  "functions": {
+    "api/mcp.js": { "maxDuration": 60, "includeFiles": "content.json" },
+    "api/drawing.py": { "maxDuration": 60, "includeFiles": "lib/**" }
+  }
 }

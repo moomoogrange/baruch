@@ -82,8 +82,9 @@ https://baruch-ebon.vercel.app/mcp
 
 - 서류를 폴더에 파일로 쌓지 않고 대화 안에서 한 건씩 써 줍니다. 파일 만들기 기능이 있는 AI라면 문서나 PDF로 받을 수 있습니다.
 - 검토를 맡을 에이전트가 따로 없어서, 같은 AI가 대조하는 역할과 받는 쪽 역할을 차례로 맡아 스스로 검토합니다.
-- 건축물 조회와 도면 그리기는 아직 Claude Code 플러그인에서만 됩니다. 대화창에서 쓰려면 archhub 커넥터(`https://mcp.gomdori.app/archhub`)를 따로 등록합니다.
-- 연결 서버는 업무 안내와 법령 조문만 돌려줍니다. 이름이나 주소, 사연은 서버로 보내지 않게 되어 있고, 대화 내용은 쓰고 계신 AI 서비스의 약관을 따릅니다.
+- 건축물대장 조회와 배치도·평면도 그리기도 대화창에서 됩니다. 도면은 SVG로 오고, 브라우저로 열어 A4 가로로 인쇄해 PDF로 저장합니다. 경사는 그림 없이 숫자로만 알려 줍니다.
+- 지번으로 필지 경계와 대장 면적을 받는 것, 항공사진·지적도를 바탕에 까는 것은 대화창에서 되지 않습니다. 본인 브이월드 인증키가 필요해서 Claude Code 플러그인에서만 씁니다.
+- 연결 서버는 업무 안내, 법령 조문, 건축물대장 기록, 도면을 돌려주고 받은 값을 저장하지 않습니다. 건물 조회와 도면에는 건물의 지번 주소가 서버로 가고, 이름이나 사연은 보내지 않게 되어 있습니다. 대화 내용은 쓰고 계신 AI 서비스의 약관을 따릅니다.
 
 ## 설치
 
@@ -232,7 +233,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 agents/             baruch, shaphan, nathan
 commands/           work, case, precheck, check, pdf, registry-check, status, law, building, drawing,
                     start, sinmungo-ask, docs, sinmungo-apply, registry, tax (비영리 사단법인)
-mcp/                Claude·ChatGPT 연결 서버 (api/mcp.js, 대화창용 규칙, 배포 스크립트)
+mcp/                Claude·ChatGPT 연결 서버 (api/mcp.js, 도면 함수 api/drawing.py, 대화창용 규칙, 배포 스크립트)
 docs/               소개 쪽
 skills/
   work-engine/              어떤 업무든 따르는 공통 절차, 업무 카드 형식

@@ -274,17 +274,25 @@ def warnings(spec):
     return out
 
 
+def prepare(spec):
+    """값을 점검해 (그릴 준비가 된 내용, 고칠 것 목록)을 돌려준다. 고칠 것이 있으면 내용은 None이다."""
+    if not isinstance(spec, dict):
+        return None, ["도면 내용이 { } 로 시작하는 JSON이어야 합니다."]
+    found = errors(spec)
+    if found:
+        return None, found
+    return {**spec, "방위각": NORTH.get(spec["방위"], spec["방위"])}, []
+
+
 def load(path):
     try:
         spec = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         die(f"파일을 읽지 못했습니다: {path} ({e})")
-    if not isinstance(spec, dict):
-        die("파일 내용이 { } 로 시작하는 JSON이어야 합니다.")
-    found = errors(spec)
+    ready, found = prepare(spec)
     if found:
         die("고쳐야 그릴 수 있습니다.\n" + "\n".join(f"  - {e}" for e in found))
-    return {**spec, "방위각": NORTH.get(spec["방위"], spec["방위"])}
+    return ready
 
 
 def find_browser():
