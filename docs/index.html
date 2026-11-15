@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바룩 — 법무사·행정사 없이 서류를 직접 냅니다</title>
+<meta name="description" content="등기, 인허가, 변경신고, 처분 불복, 소송 서류까지. 바룩이 절차를 짚고 초안을 쓰고, 내기 전에 두 번 더 봅니다. 무료, 오픈소스 Claude Code 플러그인.">
+<meta property="og:title" content="바룩 — 법무사·행정사 없이 서류를 직접 냅니다">
+<meta property="og:description" content="등기, 인허가, 변경신고, 처분 불복, 소송 서류까지 본인이 직접. 무료, 오픈소스.">
+<link rel="icon" href="tiles/b-07.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+/* 무무 타일 시스템(포르투 방식)의 토큰을 그대로 쓴다 */
+:root{
+  --a1:#2C6349;--a2:#43825E;--a3:#6FA98B;--a4:#A2CCB6;--a5:#D0E5D9;
+  --b1:#43843A;--b2:#63A94F;--b3:#8FCB77;--b4:#BEE0AA;--b5:#E4F2D8;
+  --c1:#2A6A7A;--c2:#3C8B9C;--c3:#6FB6C4;--c4:#ABD7E0;--c5:#DCEDF1;
+  --paper:#F7F2E6;
+  --ink:var(--a1);--dim:#34694B;--faint:#3D7356;
+  --rule:rgba(44,99,73,.16);--rule2:rgba(44,99,73,.32);
+  --title:'Gowun Dodum',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',Roboto,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  --wrap:1040px;--gut:20px;--r2:8px;--r3:12px;--r4:16px;
+}
+@media(min-width:768px){:root{--gut:24px}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.75;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{font-family:var(--title);font-weight:400;line-height:1.3;margin:0;letter-spacing:-.01em}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gut)}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;padding:8px;z-index:9}
+
+/* 머리 */
+.top{position:sticky;top:0;z-index:5;background:rgba(247,242,230,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.top .wrap{display:flex;align-items:center;gap:16px;height:56px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--title);font-size:1.25rem;text-decoration:none}
+.brand svg{width:28px;height:28px;border-radius:4px}
+.top nav{margin-left:auto;display:flex;gap:18px;font-size:.875rem}
+.top nav a{text-decoration:none;color:var(--dim)}
+.top nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.top .get{background:var(--a1);color:var(--paper);padding:7px 14px;border-radius:999px;text-decoration:none;font-size:.875rem;white-space:nowrap}
+@media(max-width:860px){.top nav{display:none}.top .get{margin-left:auto}}
+
+/* 첫 화면 */
+.hero{padding:56px 0 48px}
+.hero .wrap{display:grid;gap:40px;align-items:center;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){.hero{padding:88px 0 72px}.hero .wrap{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:56px}}
+.tag{display:inline-flex;flex-wrap:wrap;gap:8px;font-size:.8125rem;color:var(--dim);margin-bottom:20px}
+.tag span{border:1px solid var(--rule2);border-radius:999px;padding:3px 11px}
+.hero h1{font-size:clamp(2.1rem,5.4vw,3.5rem);line-height:1.22}
+.hero .lead{margin-top:20px;font-size:1.125rem;color:var(--dim);max-width:34em}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.btn{display:inline-block;padding:13px 22px;border-radius:var(--r2);text-decoration:none;font-size:1rem;border:1px solid var(--a1)}
+.btn.fill{background:var(--a1);color:var(--paper)}
+.btn:hover{background:var(--a2);border-color:var(--a2);color:var(--paper)}
+.hero small{display:block;margin-top:14px;color:var(--faint);font-size:.8125rem}
+/* 격자 — 포르투 방식: 섬 타일을 틈 없이 채운다 */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-radius:var(--r4);overflow:hidden;max-width:420px;margin:0 auto;width:100%}
+.grid svg{width:100%;height:auto;aspect-ratio:1;display:block}
+
+/* 프리즈 — 이음 타일이 흐른다. 글자는 얹지 않는다 */
+.frieze{height:26px;overflow:hidden;border-block:1px solid var(--rule)}
+.frieze div{display:flex;width:max-content;animation:drift 120s linear infinite}
+.frieze svg{width:26px;height:26px;display:block;flex:none}
+@media(min-width:768px){.frieze{height:34px}.frieze svg{width:34px;height:34px}}
+@keyframes drift{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.frieze div{animation:none}html{scroll-behavior:auto}}
+
+section{padding:64px 0}
+@media(min-width:900px){section{padding:96px 0}}
+.kicker{font-size:.8125rem;color:var(--faint);letter-spacing:.04em;margin-bottom:10px}
+h2{font-size:clamp(1.6rem,3.6vw,2.4rem)}
+.sub{margin-top:14px;color:var(--dim);max-width:40em}
+.tint{background:var(--b5)}
+.water{background:var(--c5)}
+
+/* 다루는 일 */
+.two{display:grid;gap:40px;margin-top:40px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:820px){.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.two h3{font-size:1.25rem;padding-bottom:12px;border-bottom:2px solid var(--a1)}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.rows svg{width:34px;height:34px;border-radius:4px;margin-top:2px}
+.rows b{font-weight:600;display:block}
+.rows span{color:var(--dim);font-size:.9375rem}
+.note{margin-top:28px;color:var(--dim);font-size:.9375rem;max-width:44em}
+
+/* 순서 */
+.flow{display:grid;gap:40px;margin-top:40px;align-items:start;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){.flow{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:44px minmax(0,1fr);gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--rule2)}
+.steps li::before{content:counter(s);font-family:var(--title);font-size:1.5rem;line-height:1.3;color:var(--a2)}
+.steps b{font-weight:600}
+.steps span{grid-column:2;color:var(--dim);font-size:.9375rem}
+figure{margin:0}
+.shot{border:1px solid var(--rule2);border-radius:var(--r3);overflow:hidden;background:#fff}
+.shot img{display:block;width:100%;height:auto}
+figcaption{font-size:.8125rem;color:var(--faint);margin-top:10px}
+
+/* 돌아오지 않게 */
+.three{display:grid;gap:0;margin-top:40px;border-top:2px solid var(--a1)}
+.three>div{padding:26px 0;border-bottom:1px solid var(--rule2);display:grid;gap:8px 28px}
+@media(min-width:820px){.three>div{grid-template-columns:260px 1fr}}
+.three h3{font-size:1.25rem}
+.three p{color:var(--dim)}
+.three p+p{margin-top:10px}
+.eyes{display:grid;gap:0;margin-top:36px}
+@media(min-width:820px){.eyes{grid-template-columns:repeat(3,1fr)}}
+.eyes>div{padding:22px 0;border-top:1px solid var(--rule2)}
+@media(min-width:820px){.eyes>div{padding:22px 24px 0 0;border-top:2px solid var(--a1);margin-right:24px}}
+.eyes svg{width:44px;height:44px;border-radius:6px;margin-bottom:10px}
+.eyes h3{font-size:1.125rem}
+.eyes em{font-style:normal;color:var(--faint);font-size:.8125rem;display:block;margin-bottom:6px}
+.eyes p{color:var(--dim);font-size:.9375rem}
+
+/* 법령 */
+.law{display:grid;gap:36px;margin-top:36px;align-items:start;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){.law{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px}}
+pre{margin:0;background:var(--a1);color:#EAF3EC;border-radius:var(--r3);padding:20px 22px;font-family:var(--mono);font-size:.8125rem;line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+pre i{font-style:normal;color:var(--b3)}
+.plain{list-style:none;margin:0;padding:0}
+.plain li{padding:12px 0;border-bottom:1px solid var(--rule);color:var(--dim)}
+.plain li b{color:var(--ink);font-weight:600}
+
+/* 하지 않는 일 */
+.not{display:grid;gap:0;margin-top:36px}
+@media(min-width:820px){.not{grid-template-columns:1fr 1fr;column-gap:56px}}
+.not div{padding:18px 0;border-top:1px solid var(--rule2)}
+.not b{display:block;font-weight:600;margin-bottom:4px}
+.not span{color:var(--dim);font-size:.9375rem}
+
+/* 설치 */
+.inst{display:grid;gap:36px;margin-top:36px;align-items:start;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){.inst{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.inst h3{font-size:1.125rem;margin-bottom:12px}
+.say{list-style:none;margin:0;padding:0}
+.say li{padding:11px 0 11px 18px;border-left:3px solid var(--a3);margin-bottom:10px;background:rgba(255,255,255,.5);color:var(--ink)}
+
+/* 만든 이야기 */
+.story{max-width:40em}
+.story p{font-family:var(--title);font-size:1.1875rem;line-height:1.95;margin-top:20px}
+.story cite{display:block;margin-top:22px;font-style:normal;color:var(--faint);font-size:.875rem}
+
+/* 맺음 */
+.thanks{list-style:none;margin:28px 0 0;padding:0}
+.thanks li{padding:14px 0;border-bottom:1px solid var(--rule);display:grid;gap:2px 24px}
+@media(min-width:820px){.thanks li{grid-template-columns:260px 1fr}}
+.thanks span{color:var(--dim);font-size:.9375rem}
+footer{background:var(--a1);color:#DDEBE0;padding:44px 0;font-size:.875rem}
+footer a{color:#fff}
+footer .wrap{display:grid;gap:18px}
+footer p{max-width:52em;line-height:1.8}
+footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">본문으로</a>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="b-01" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="20" y="10" width="56" height="76" rx="4" fill="#43825E"/><rect x="26" y="16" width="44" height="64" rx="2" fill="#F7F2E6"/><rect x="32" y="24" width="32" height="4" fill="#2C6349"/><rect x="32" y="34" width="32" height="4" fill="#BEE0AA"/><rect x="32" y="44" width="32" height="4" fill="#BEE0AA"/><rect x="32" y="54" width="20" height="4" fill="#BEE0AA"/><circle cx="58" cy="68" r="7" fill="#8FCB77"/></symbol>
+<symbol id="b-02" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="40" y="10" width="16" height="34" rx="8" fill="#2C6349"/><rect x="30" y="40" width="36" height="14" rx="4" fill="#43825E"/><rect x="24" y="54" width="48" height="10" rx="3" fill="#2C6349"/><ellipse cx="48" cy="80" rx="26" ry="6" fill="#BEE0AA"/><circle cx="48" cy="80" r="3" fill="#8FCB77"/></symbol>
+<symbol id="b-03" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="46" y="8" width="4" height="22" fill="#2C6349"/><path d="M50 8 L68 14 L50 20 Z" fill="#8FCB77"/><rect x="14" y="30" width="68" height="8" rx="2" fill="#43825E"/><rect x="18" y="38" width="60" height="44" fill="#2C6349"/><rect x="26" y="46" width="10" height="12" fill="#F7F2E6"/><rect x="43" y="46" width="10" height="12" fill="#F7F2E6"/><rect x="60" y="46" width="10" height="12" fill="#F7F2E6"/><rect x="42" y="64" width="12" height="18" fill="#BEE0AA"/><rect x="10" y="82" width="76" height="6" rx="2" fill="#43825E"/></symbol>
+<symbol id="b-04" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><path d="M48 10 L86 32 L10 32 Z" fill="#2C6349"/><rect x="14" y="32" width="68" height="6" fill="#43825E"/><rect x="20" y="40" width="8" height="36" fill="#43825E"/><rect x="36" y="40" width="8" height="36" fill="#43825E"/><rect x="52" y="40" width="8" height="36" fill="#43825E"/><rect x="68" y="40" width="8" height="36" fill="#43825E"/><rect x="12" y="76" width="72" height="6" fill="#2C6349"/><rect x="8" y="82" width="80" height="6" rx="2" fill="#43825E"/><circle cx="48" cy="23" r="4" fill="#BEE0AA"/></symbol>
+<symbol id="b-05" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="14" y="14" width="68" height="70" rx="4" fill="#2C6349"/><rect x="20" y="14" width="6" height="70" fill="#43825E"/><rect x="30" y="22" width="46" height="54" rx="2" fill="#F7F2E6"/><rect x="36" y="30" width="34" height="4" fill="#43825E"/><rect x="36" y="40" width="34" height="4" fill="#BEE0AA"/><rect x="36" y="50" width="34" height="4" fill="#BEE0AA"/><rect x="36" y="60" width="22" height="4" fill="#BEE0AA"/></symbol>
+<symbol id="b-06" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="42" y="8" width="12" height="52" rx="3" fill="#2C6349" transform="rotate(38 48 48)"/><path d="M22 62 L34 74 L16 80 Z" fill="#43825E"/><rect x="58" y="14" width="12" height="10" rx="2" fill="#8FCB77" transform="rotate(38 48 48)"/><rect x="14" y="84" width="44" height="4" rx="2" fill="#BEE0AA"/></symbol>
+<symbol id="b-07" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="22" y="20" width="52" height="56" fill="#BEE0AA"/><rect x="14" y="14" width="68" height="12" rx="6" fill="#2C6349"/><rect x="14" y="70" width="68" height="12" rx="6" fill="#2C6349"/><circle cx="14" cy="20" r="6" fill="#43825E"/><circle cx="82" cy="20" r="6" fill="#43825E"/><circle cx="14" cy="76" r="6" fill="#43825E"/><circle cx="82" cy="76" r="6" fill="#43825E"/><rect x="30" y="34" width="36" height="4" fill="#2C6349"/><rect x="30" y="44" width="36" height="4" fill="#43825E"/><rect x="30" y="54" width="24" height="4" fill="#43825E"/></symbol>
+<symbol id="b-08" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><circle cx="40" cy="40" r="28" fill="#2C6349"/><circle cx="40" cy="40" r="20" fill="#F7F2E6"/><rect x="34" y="30" width="16" height="4" fill="#BEE0AA"/><rect x="34" y="38" width="16" height="4" fill="#BEE0AA"/><rect x="34" y="46" width="10" height="4" fill="#BEE0AA"/><rect x="60" y="54" width="12" height="34" rx="5" fill="#43825E" transform="rotate(-45 66 60)"/></symbol>
+<symbol id="b-09" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="12" y="18" width="72" height="68" rx="5" fill="#2C6349"/><rect x="18" y="34" width="60" height="46" rx="2" fill="#F7F2E6"/><rect x="26" y="10" width="8" height="16" rx="3" fill="#43825E"/><rect x="62" y="10" width="8" height="16" rx="3" fill="#43825E"/><rect x="24" y="40" width="10" height="8" fill="#BEE0AA"/><rect x="38" y="40" width="10" height="8" fill="#BEE0AA"/><rect x="52" y="40" width="10" height="8" fill="#BEE0AA"/><rect x="66" y="40" width="8" height="8" fill="#BEE0AA"/><rect x="24" y="54" width="10" height="8" fill="#BEE0AA"/><rect x="38" y="54" width="10" height="8" fill="#8FCB77"/><rect x="52" y="54" width="10" height="8" fill="#BEE0AA"/><rect x="66" y="54" width="8" height="8" fill="#BEE0AA"/><rect x="24" y="68" width="10" height="8" fill="#BEE0AA"/><rect x="38" y="68" width="10" height="8" fill="#BEE0AA"/></symbol>
+<symbol id="b-10" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="10" y="24" width="76" height="52" rx="4" fill="#2C6349"/><path d="M10 28 L48 56 L86 28 L86 24 L10 24 Z" fill="#43825E"/><path d="M14 72 L40 50 L48 56 L56 50 L82 72 Z" fill="#BEE0AA"/><circle cx="70" cy="66" r="8" fill="#8FCB77"/></symbol>
+<symbol id="b-11" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><path d="M48 8 L82 20 L82 48 Q82 74 48 88 Q14 74 14 48 L14 20 Z" fill="#2C6349"/><path d="M30 48 L42 60 L66 34 L72 40 L42 72 L24 54 Z" fill="#BEE0AA"/></symbol>
+<symbol id="b-12" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="46" y="12" width="4" height="66" fill="#2C6349"/><rect x="18" y="20" width="60" height="4" rx="2" fill="#43825E"/><circle cx="48" cy="14" r="6" fill="#43825E"/><path d="M12 50 A14 14 0 0 0 40 50 Z" fill="#2C6349"/><path d="M56 50 A14 14 0 0 0 84 50 Z" fill="#2C6349"/><path d="M26 24 L14 50 L38 50 Z" fill="#BEE0AA"/><path d="M70 24 L58 50 L82 50 Z" fill="#BEE0AA"/><rect x="30" y="78" width="36" height="8" rx="3" fill="#43825E"/></symbol>
+<symbol id="b-13" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><path d="M48 12 L88 46 L8 46 Z" fill="#2C6349"/><rect x="18" y="46" width="60" height="38" fill="#43825E"/><rect x="40" y="58" width="16" height="26" fill="#F7F2E6"/><rect x="24" y="52" width="10" height="10" fill="#BEE0AA"/><rect x="62" y="52" width="10" height="10" fill="#BEE0AA"/><rect x="64" y="18" width="8" height="16" fill="#2C6349"/></symbol>
+<symbol id="b-14" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><path d="M10 30 L18 12 L78 12 L86 30 Z" fill="#2C6349"/><path d="M10 30 A9.5 9.5 0 0 0 29 30 Z" fill="#8FCB77"/><path d="M29 30 A9.5 9.5 0 0 0 48 30 Z" fill="#BEE0AA"/><path d="M48 30 A9.5 9.5 0 0 0 67 30 Z" fill="#8FCB77"/><path d="M67 30 A9.5 9.5 0 0 0 86 30 Z" fill="#BEE0AA"/><rect x="16" y="40" width="64" height="44" fill="#43825E"/><rect x="24" y="50" width="22" height="18" fill="#F7F2E6"/><rect x="54" y="50" width="18" height="34" fill="#2C6349"/><rect x="10" y="84" width="76" height="4" rx="2" fill="#2C6349"/></symbol>
+<symbol id="b-15" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><circle cx="24" cy="34" r="10" fill="#43825E"/><circle cx="72" cy="34" r="10" fill="#43825E"/><circle cx="48" cy="28" r="12" fill="#2C6349"/><path d="M8 78 Q8 50 24 50 Q36 50 38 62 L38 78 Z" fill="#43825E"/><path d="M88 78 Q88 50 72 50 Q60 50 58 62 L58 78 Z" fill="#43825E"/><path d="M28 84 Q28 46 48 46 Q68 46 68 84 Z" fill="#2C6349"/></symbol>
+<symbol id="b-16" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><path d="M10 24 L10 16 Q10 12 14 12 L38 12 L46 22 L82 22 Q86 22 86 26 L86 30 L10 30 Z" fill="#43825E"/><rect x="10" y="28" width="76" height="54" rx="4" fill="#2C6349"/><rect x="20" y="40" width="40" height="4" fill="#BEE0AA"/><rect x="20" y="50" width="56" height="4" fill="#BEE0AA"/><rect x="20" y="60" width="30" height="4" fill="#BEE0AA"/><circle cx="72" cy="68" r="6" fill="#8FCB77"/></symbol>
+<symbol id="b-21" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="0" y="84" width="96" height="6" fill="#8FCB77"/><rect x="10" y="46" width="22" height="38" rx="2" fill="#43825E"/><rect x="14" y="52" width="14" height="3" fill="#F7F2E6"/><rect x="14" y="59" width="14" height="3" fill="#F7F2E6"/><rect x="38" y="36" width="22" height="48" rx="2" fill="#2C6349"/><rect x="42" y="42" width="14" height="3" fill="#BEE0AA"/><rect x="42" y="49" width="14" height="3" fill="#BEE0AA"/><rect x="42" y="56" width="9" height="3" fill="#BEE0AA"/><rect x="66" y="52" width="22" height="32" rx="2" fill="#43825E"/><rect x="70" y="58" width="14" height="3" fill="#F7F2E6"/><rect x="70" y="65" width="9" height="3" fill="#F7F2E6"/></symbol>
+<symbol id="b-22" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="0" y="44" width="96" height="8" fill="#BEE0AA"/><circle cx="48" cy="48" r="16" fill="#2C6349"/><circle cx="48" cy="48" r="7" fill="#F7F2E6"/><rect x="0" y="84" width="96" height="6" fill="#8FCB77"/></symbol>
+<symbol id="b-23" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="0" y="84" width="96" height="6" fill="#8FCB77"/><rect x="18" y="34" width="12" height="26" rx="6" fill="#2C6349"/><rect x="12" y="58" width="24" height="10" rx="3" fill="#43825E"/><rect x="8" y="68" width="32" height="8" rx="2" fill="#2C6349"/><rect x="58" y="44" width="12" height="18" rx="6" fill="#43825E"/><rect x="54" y="60" width="20" height="8" rx="3" fill="#2C6349"/><rect x="50" y="68" width="28" height="8" rx="2" fill="#43825E"/><circle cx="84" cy="80" r="4" fill="#BEE0AA"/></symbol>
+<symbol id="b-24" viewBox="0 0 96 96"><rect width="96" height="96" fill="#F7F2E6"/><rect x="0" y="20" width="96" height="8" fill="#2C6349"/><rect x="0" y="28" width="96" height="4" fill="#43825E"/><rect x="14" y="32" width="12" height="48" fill="#43825E"/><rect x="42" y="32" width="12" height="48" fill="#43825E"/><rect x="70" y="32" width="12" height="48" fill="#43825E"/><rect x="0" y="80" width="96" height="4" fill="#2C6349"/><rect x="0" y="84" width="96" height="6" fill="#8FCB77"/></symbol>
+</svg>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="#"><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-07"/></svg>바룩</a>
+  <nav aria-label="쪽 안 이동">
+    <a href="#work">다루는 일</a><a href="#flow">일하는 순서</a><a href="#back">돌아오지 않게</a><a href="#law">법령</a><a href="#install">설치</a><a href="#story">만든 이야기</a>
+  </nav>
+  <a class="get" href="#install">설치하기</a>
+</div></header>
+
+<main id="main">
+<div class="hero"><div class="wrap">
+  <div>
+    <div class="tag"><span>버전 1.0</span><span>무료</span><span>오픈소스</span></div>
+    <h1>법무사·행정사 없이,<br>서류를 직접 냅니다.</h1>
+    <p class="lead">등기, 인허가, 변경신고, 처분 불복, 소송 서류까지. 바룩이 절차를 짚고 초안을 쓰고, 내기 전에 두 번 더 봅니다. 서명하고 내는 일만 직접 하시면 됩니다.</p>
+    <div class="btns">
+      <a class="btn fill" href="#install">설치하기</a>
+      <a class="btn" href="https://github.com/moomoogrange/baruch">GitHub에서 보기</a>
+    </div>
+    <small>Claude Code에서 쓰는 플러그인입니다. 법률 자문이 아니며 결과를 보장하지 않습니다.</small>
+  </div>
+  <div class="grid" role="img" aria-label="서류, 도장, 관청, 법원, 등기부, 펜, 두루마리, 돋보기, 달력, 봉투, 확인, 저울, 집, 가게, 모임, 사건철을 그린 타일">
+    <svg viewBox="0 0 96 96"><use href="#b-01"/></svg><svg viewBox="0 0 96 96"><use href="#b-02"/></svg><svg viewBox="0 0 96 96"><use href="#b-03"/></svg><svg viewBox="0 0 96 96"><use href="#b-04"/></svg>
+    <svg viewBox="0 0 96 96"><use href="#b-05"/></svg><svg viewBox="0 0 96 96"><use href="#b-06"/></svg><svg viewBox="0 0 96 96"><use href="#b-07"/></svg><svg viewBox="0 0 96 96"><use href="#b-08"/></svg>
+    <svg viewBox="0 0 96 96"><use href="#b-09"/></svg><svg viewBox="0 0 96 96"><use href="#b-10"/></svg><svg viewBox="0 0 96 96"><use href="#b-11"/></svg><svg viewBox="0 0 96 96"><use href="#b-12"/></svg>
+    <svg viewBox="0 0 96 96"><use href="#b-13"/></svg><svg viewBox="0 0 96 96"><use href="#b-14"/></svg><svg viewBox="0 0 96 96"><use href="#b-15"/></svg><svg viewBox="0 0 96 96"><use href="#b-16"/></svg>
+  </div>
+</div></div>
+
+<div class="frieze" aria-hidden="true"><div><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-21"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg><svg viewBox="0 0 96 96"><use href="#b-23"/></svg><svg viewBox="0 0 96 96"><use href="#b-22"/></svg></div></div>
+
+<section id="work"><div class="wrap">
+  <p class="kicker">다루는 일</p>
+  <h2>관청에 내는 일과<br>법원·등기소에 내는 일.</h2>
+  <p class="sub">사정을 말하면 걸리는 신청을 모두 찾아 순서를 정합니다. 가게 이름 하나를 바꿔도 영업신고, 사업자등록, 법인등기가 함께 걸립니다.</p>
+  <div class="two">
+    <div>
+      <h3>관청에 내는 일</h3>
+      <ul class="rows">
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-14"/></svg><div><b>영업 인허가</b><span>영업신고·허가·등록, 상호·대표자·소재지 변경신고, 지위승계, 폐업</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-13"/></svg><div><b>토지·건축·농지</b><span>건축신고·허가, 용도변경, 개발행위허가, 농지·산지 전용</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-03"/></svg><div><b>국공유재산</b><span>사용허가와 대부, 국유림 대부, 초지, 갱신, 원상회복, 변상금</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-11"/></svg><div><b>행정처분 대응</b><span>의견제출, 이의신청, 행정심판, 과태료 이의, 정보공개청구</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-15"/></svg><div><b>법인·단체 설립</b><span>사단법인, 재단법인, 협동조합, 비영리민간단체, 기부금영수증 지정</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-10"/></svg><div><b>문서 작성</b><span>내용증명, 통지서, 합의서, 위임장, 진정서, 질의서</span></div></li>
+      </ul>
+    </div>
+    <div>
+      <h3>법원·등기소에 내는 일</h3>
+      <ul class="rows">
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-05"/></svg><div><b>법인 등기</b><span>설립, 임원·본점·상호·목적 변경, 증자, 해산, 농업법인·협동조합 등기</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-13"/></svg><div><b>부동산 등기</b><span>매매·증여·상속 소유권이전, 근저당 설정과 말소, 주소 변경</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-01"/></svg><div><b>민사 소송 서류</b><span>지급명령, 소액사건, 소장, 답변서, 준비서면</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-12"/></svg><div><b>보전·집행·공탁</b><span>가압류, 가처분, 채권압류·추심, 재산명시, 공탁</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-07"/></svg><div><b>가사·비송</b><span>상속포기·한정승인, 개명, 가족관계등록 정정, 후견, 협의이혼</span></div></li>
+        <li><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-09"/></svg><div><b>회생·파산</b><span>개인회생, 개인파산·면책</span></div></li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">목록에 없는 신청도 같은 순서로 근거 법령부터 찾아 처리합니다. 공문이 여러 번 오가는 일은 사건으로 묶어 받은 공문, 기한, 낸 서류, 접수증을 끝까지 챙깁니다.</p>
+</div></section>
+
+<section id="flow" class="tint"><div class="wrap">
+  <p class="kicker">일하는 순서</p>
+  <h2>어떤 일이든 같은 순서로 합니다.</h2>
+  <div class="flow">
+    <ol class="steps">
+      <li><b>사정을 듣습니다</b><span>걸리는 신청을 모두 찾고 순서를 정합니다.</span></li>
+      <li><b>법령에서 근거, 내는 곳, 서식, 기한을 찾습니다</b><span>기억으로 말하지 않고 그날의 조문을 읽습니다.</span></li>
+      <li><b>먼저 들러야 하는 곳을 찾습니다</b><span>등기 전에 관청에서 받아야 하는 확인서 같은 것입니다.</span></li>
+      <li><b>초안을 씁니다</b><span>모르는 것은 지어내지 않고 빈칸으로 남겨 여쭙니다.</span></li>
+      <li><b>담당자가 물을 것에 미리 답합니다</b><span>접수 창구, 담당 주무관, 등기관, 재판부 자리에서 질문을 뽑습니다.</span></li>
+      <li><b>다른 둘이 따로 검토합니다</b><span>쓴 사람은 자기 글의 틀린 곳을 잘 못 봅니다.</span></li>
+      <li><b>낼 꼴로 만듭니다</b><span>첨부는 PDF로, 화면에 붙여 넣을 글과 할 일 목록을 함께 드립니다.</span></li>
+      <li><b>내고 나서 적어 둡니다</b><span>접수번호, 기한, 보완 요구, 뒤따르는 신고.</span></li>
+    </ol>
+    <figure>
+      <div class="shot"><img src="img/sample-jeonggwan.png" alt="바룩이 만든 사단법인 정관 초안의 첫 쪽. 채울 자리가 노랗게 칠해져 있고 쪽 가운데에 초안 표시가 있다." width="756" height="704" loading="lazy"></div>
+      <figcaption>바룩이 만든 정관 초안의 첫 쪽입니다. 채울 자리는 노랗게 칠해 두고, 빈칸이 하나라도 남으면 제출용 PDF를 만들지 않습니다.</figcaption>
+    </figure>
+  </div>
+</div></section>
+
+<section id="back"><div class="wrap">
+  <p class="kicker">돌아오지 않게</p>
+  <h2>등기소에서, 창구에서<br>되돌아오는 일을 줄입니다.</h2>
+  <p class="sub">서류는 한 번에 받아들여지지 않는 것이 보통입니다. 바룩은 내기 전에 그 까닭을 먼저 찾습니다.</p>
+  <div class="three">
+    <div><h3>등기 전에 들를 곳</h3><div><p>농업회사법인은 변경등기 전에 시·군·구에 먼저 신고하고 신고확인증을 받아야 합니다. 사단법인은 정관을 바꿀 때 주무관청 허가가 먼저입니다. 법인 종류마다 이런 것이 있습니다.</p><p>바룩은 법인의 근거 법령에서 등기 전에 받아야 하는 서류를 찾아 먼저 알려 드립니다.</p></div></div>
+    <div><h3>놓치고 있던 등기</h3><div><p>대표자가 이사를 하면 변경등기를 해야 합니다. 임원 임기가 끝나면 같은 사람이 계속해도 다시 등기해야 합니다. 기한을 넘기면 대표자에게 과태료가 나옵니다.</p><p>등기부를 읽고 지금 사실과 견주어 빠진 등기를 찾고, 임기 달력을 만들어 드립니다.</p></div></div>
+    <div><h3>신청서 대조</h3><div><p>등기관은 신청서와 붙인 서류를 글자 단위로 맞춰 봅니다. 주소 표기, 날짜, 취임과 중임의 구분, 첨부 서류의 통수에서 보정이 나옵니다.</p><p>신청서를 칸마다 등기부, 정관, 의사록과 대조합니다.</p></div></div>
+    <div><h3>담당자가 물을 것</h3><div><p>허가 담당 주무관은 "왜 우리 소관인가", "이 예산의 근거가 무엇인가"를 묻습니다. 질문을 미리 뽑아 답과 증빙을 채우고, 답이 없는 질문이 남으면 내지 말라고 말씀드립니다.</p></div></div>
+  </div>
+  <div class="eyes">
+    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-06"/></svg><em>쓰는 이</em><h3>바룩</h3><p>듣고, 순서를 짜고, 서류를 씁니다. 지적을 받으면 고칩니다.</p></div>
+    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-08"/></svg><em>대조하는 이</em><h3>사반</h3><p>서류를 조문, 들은 사실, 다른 서류와 한 글자씩 맞춰 봅니다. 고치지 않고 틀린 곳만 알립니다.</p></div>
+    <div><svg viewBox="0 0 96 96" aria-hidden="true"><use href="#b-12"/></svg><em>받는 쪽에 앉는 이</em><h3>나단</h3><p>담당 공무원, 등기관, 재판부, 상대방 자리에 앉아 이 서류를 왜 받아 줄 수 없는지 먼저 찾습니다.</p></div>
+  </div>
+</div></section>
+
+<div class="frieze" aria-hidden="true"><div><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg><svg viewBox="0 0 96 96"><use href="#b-24"/></svg></div></div>
+
+<section id="law" class="water"><div class="wrap">
+  <p class="kicker">법령</p>
+  <h2>법령은 그날의 조문으로 읽습니다.</h2>
+  <div class="law">
+    <div>
+      <ul class="plain">
+        <li><b>현행 조문을 조회합니다.</b> 법제처 Open API로 조회하는 날의 조문을 읽고 시행일과 함께 적습니다.</li>
+        <li><b>지난 일은 그날의 조문으로.</b> 이미 받은 처분이나 오래된 허가는 그때 시행 중이던 조문을 따로 읽습니다.</li>
+        <li><b>서식과 조례도 찾습니다.</b> 별지 서식, 별표, 자치법규, 해석례까지 조회합니다.</li>
+        <li><b>모르면 모른다고 적습니다.</b> 관청 내부 기준처럼 어디에도 없는 것은 "관청 확인"으로 표시하고 물어볼 말을 써 드립니다.</li>
+      </ul>
+    </div>
+    <pre><i>$ law.py live art 민법 제32조</i>
+
+[현행 조회 · 민법]
+공포일: 2026-03-17
+시행일: 2026-03-17
+
+제32조 비영리법인의 설립과 허가
+학술, 종교, 자선, 기예, 사교 기타 영리아닌 사업을
+목적으로 하는 사단 또는 재단은 주무관청의 허가를
+얻어 이를 법인으로 할 수 있다.</pre>
+  </div>
+</div></section>
+
+<section id="not"><div class="wrap">
+  <p class="kicker">하지 않는 일</p>
+  <h2>할 수 없는 일은 먼저 말씀드립니다.</h2>
+  <div class="not">
+    <div><b>대신 내지 않습니다</b><span>서명, 날인, 본인 인증, 제출은 본인이 합니다. 단체의 일은 대표자 이름으로 냅니다.</span></div>
+    <div><b>법정에 나가지 않습니다</b><span>서류는 돕지만 변론은 본인이나 변호사가 합니다. 상대가 다투는 복잡한 사건은 변호사에게 가시라고 말합니다.</span></div>
+    <div><b>결과를 보장하지 않습니다</b><span>허가, 등기, 판결은 관청과 등기소와 법원이 정합니다.</span></div>
+    <div><b>크고 되돌릴 수 없는 일은 전문가를 권합니다</b><span>대금과 맞바꾸는 부동산 등기, 큰 금액의 가압류, 며칠 남지 않은 불복 기한. 만든 서류 묶음을 그대로 넘기면 됩니다.</span></div>
+    <div><b>남의 일을 돈 받고 해 주는 데 쓰지 않습니다</b><span>그 일에는 행정사·법무사·변호사 자격이 필요합니다. 바룩은 자기 일을 직접 하는 분을 위한 도구입니다.</span></div>
+    <div><b>다루지 않는 일</b><span>형사 사건, 세무 조정, 노무 분쟁, 특허.</span></div>
+  </div>
+</div></section>
+
+<section id="private" class="tint"><div class="wrap">
+  <p class="kicker">개인정보</p>
+  <h2>서류는 내 컴퓨터에 남습니다.</h2>
+  <p class="sub">바룩에는 서버도 계정도 없습니다. 만든 서류는 작업 폴더에만 저장됩니다. 법령을 조회할 때는 법령 이름과 조 번호만 보내고, 이름이나 주소는 보내지 않습니다. 주민등록번호는 받지 않고, 낼 때 직접 적도록 빈칸으로 둡니다. 대화 내용은 쓰고 계신 Claude의 약관을 따릅니다.</p>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <p class="kicker">설치</p>
+  <h2>두 줄이면 됩니다.</h2>
+  <div class="inst">
+    <div>
+      <h3>Claude Code에 입력합니다</h3>
+      <pre>/plugin marketplace add moomoogrange/baruch
+/plugin install baruch@baruch</pre>
+      <p class="note">설치할 때 법제처 인증키를 묻습니다. 비워 두셔도 됩니다. PDF를 만들려면 크롬이나 엣지가 깔려 있어야 합니다.</p>
+    </div>
+    <div>
+      <h3>그다음 말로 하시면 됩니다</h3>
+      <ul class="say">
+        <li>대표이사가 이사를 했어요. 등기해야 하나요?</li>
+        <li>식당을 인수했는데 뭘 신고해야 하죠?</li>
+        <li>구청에서 과태료 통지서가 왔어요.</li>
+        <li>못 받은 돈이 있어서 지급명령을 내고 싶어요.</li>
+        <li>비영리 사단법인을 만들고 싶어요.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="story" class="tint"><div class="wrap">
+  <p class="kicker">만든 이야기</p>
+  <h2>보정 요청을 수십 번 받았습니다.</h2>
+  <div class="story">
+    <p>2013년에 협동조합 법인을 세우면서부터 법무사나 행정사 없이 법인 등기를 하나하나 직접 해 왔습니다. 보정 요청을 수십 번 받았습니다.</p>
+    <p>대표자가 주소를 옮기면 변경등기를 해야 한다는 것을 그렇게 알았습니다. 임기가 끝났는데 중임 등기를 하지 않아 과태료를 낸 적도 있습니다.</p>
+    <p>혼자 풀면서 배운 것이 많습니다. 다른 대표님들도 법무사나 행정사 없이 직접 하실 수 있게 돕고 싶어서 바룩을 만들었습니다.</p>
+    <cite>무무목장 대표</cite>
+  </div>
+</div></section>
+
+<section id="thanks"><div class="wrap">
+  <p class="kicker">함께 쓴 것</p>
+  <h2>남이 만든 것 위에서 만들었습니다.</h2>
+  <ul class="thanks">
+    <li><a href="https://github.com/chrisryugj/korean-law-mcp">korean-law-mcp</a><span>류주임이 만든 법령 조회 서버입니다. 법제처 Open API로 현행 조문, 서식, 조례, 판례를 읽습니다. MIT.</span></li>
+    <li><a href="https://github.com/moomoogrange/law-go-kr-obsidian">law-go-kr-obsidian</a><span>대한민국 법령 3,037건을 내려받아 넓게 찾을 때 씁니다. CC0.</span></li>
+    <li><a href="https://www.easylaw.go.kr">찾기 쉬운 생활법령정보</a><span>법제처가 생활 중심으로 풀어 쓴 안내서입니다. 비영리 사단법인 절차의 요점을 참고했습니다.</span></li>
+    <li>무무 타일 시스템<span>이 쪽의 그림은 무무목장 사이트의 타일 규칙으로 그렸습니다. 포르투 시 아이덴티티 「Porto.」와 같은 방식입니다.</span></li>
+  </ul>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <nav aria-label="바깥 링크">
+    <a href="https://github.com/moomoogrange/baruch">GitHub</a>
+    <a href="https://github.com/moomoogrange/baruch/issues">문제 알리기</a>
+    <a href="https://github.com/moomoogrange/baruch/blob/main/LICENSE">라이선스 (MIT)</a>
+    <a href="https://moomooranch.net">무무목장</a>
+  </nav>
+  <p>바룩은 무료이며 보증하지 않습니다. 법률 자문이 아닙니다. 업무 안내는 작성일의 조문을 읽고 쓴 출발점이며, 내기 전에 현행 조문과 관청 안내를 확인하셔야 합니다.</p>
+  <p>바룩은 예레미야의 서기관입니다. 불러 주는 말을 받아 적어 문서로 만들었고, 땅을 산 증서를 봉인해 보관했습니다.</p>
+</div></footer>
+</body>
+</html>
