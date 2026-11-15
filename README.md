@@ -12,6 +12,9 @@
 - 국민신문고에 낼 질의·신청 글과 첨부 파일 묶음을 만듭니다.
 - 설립등기, 세무서 신고, 공익법인 지정 신청을 준비합니다.
 - 법령 조문을 직접 읽고 시행일과 함께 인용합니다. 현행 조문은 법제처 Open API(korean-law-mcp)로, 넓은 검색은 내려받은 법령 저장소로 봅니다.
+- **보완 요구를 미리 막습니다.** 접수 담당자, 허가 담당 주무관(중앙부처·시·도), 등기관, 세무서 담당자가 물을 질문을 미리 뽑아 답과 증빙을 채우고 보충 설명서를 만듭니다.
+- **등기 신청을 사전 점검합니다.** 법인 종류별로 등기 전에 관청에서 받아야 하는 서류(예: 농업회사법인의 신고확인증)를 근거법에서 찾고, 등기신청서를 칸마다 원본과 대조해 등기소 보정을 막습니다. 비영리법인뿐 아니라 회사·농업법인·협동조합의 변경등기에도 씁니다.
+- 관청에 내는 첨부를 A4 PDF로 만듭니다.
 - 쓴 서류를 다른 에이전트 둘이 따로 검토합니다.
 
 | 에이전트 | 일 |
@@ -36,7 +39,7 @@ Claude Code에서:
 /plugin install baruch@baruch
 ```
 
-파이썬 3과 git이 필요합니다. 법령 저장소(약 65MB)는 처음 쓸 때 `~/.local/share/baruch/law-go-kr-obsidian`에 내려받습니다. 이미 받아 둔 사본이 있으면 `BARUCH_LAW_DIR` 환경변수로 그 폴더를 가리키면 됩니다.
+파이썬 3과 git이 필요합니다. PDF를 만들려면 크롬이나 엣지가 깔려 있어야 합니다. 법령 저장소(약 65MB)는 처음 쓸 때 `~/.local/share/baruch/law-go-kr-obsidian`에 내려받습니다. 이미 받아 둔 사본이 있으면 `BARUCH_LAW_DIR` 환경변수로 그 폴더를 가리키면 됩니다.
 
 ## 쓰는 법
 
@@ -48,7 +51,10 @@ Claude Code에서:
 | 2 | `/baruch:sinmungo-ask` | 국민신문고 질의민원 — 주무관청, 심사 기준, 접수 방법 묻기 |
 | 3 | `/baruch:docs` | 설립허가 신청 서류 묶음 |
 | 4 | `/baruch:sinmungo-apply` | 국민신문고 신청 묶음 — 제목, 내용, 첨부 목록, 내는 순서 |
+| 4 | `/baruch:precheck` | 사전 보완 점검 — 담당 주무관이 물을 질문에 미리 답과 증빙 채우기, 보충 설명서 |
+| 4 | `/baruch:pdf` | 제출용 PDF 만들기 (빈칸이 남은 서류는 만들어지지 않음) |
 | 5 | `/baruch:registry 2027-01-15` | 설립등기 준비 (허가서 받은 날짜) |
+| 5 | `/baruch:registry-check 농업회사법인 상호 변경등기` | 등기 신청 사전 점검 — 등기 전에 받을 신고확인증·허가서 찾기, 신청서 칸별 대조 |
 | 6 | `/baruch:tax 2027-01-30` | 세무서 신고, 공익법인 지정 신청 (설립등기일) |
 | 언제든 | `/baruch:check` | 사반·나단의 상호 검토 |
 | 언제든 | `/baruch:status` | 진행 상황, 기한, 접수번호·회신 기록 |
@@ -61,6 +67,7 @@ Claude Code에서:
 ```
 법인설립/
   00-기초사실.md            신청인이 확인한 사실
+  06-예상-질문과-답변.md     담당자가 물을 질문, 답, 증빙
   01-순서표.md              유형, 주무관청, 단계별 할 일과 근거
   02-사전상담-질문지.md
   10-설립허가-신청서-메모.md  별지 서식에 옮겨 적을 내용
@@ -70,12 +77,14 @@ Claude Code에서:
   14-사업계획서-예산서.md
   15-임원-취임승낙서.md
   16-창립총회-회의록.md
+  17-보충-설명서.md          담당자가 물을 것에 미리 답하는 설명
   20-설립등기-준비표.md
   30~34                     세무서 신고, 공익법인 지정
   98-신청인이-할-일.md        날인, 떼어 올 증명서, 관청에 물을 것
   99-점검표.md
   기한.md
-  신문고/                   민원 제목·내용·첨부 목록, 접수 기록
+  신문고/                   민원 제목·내용, 첨부 PDF, 접수 기록
+  등기/                     선행 절차, 신청서 대조, 등기소 확인, 보정 기록
   검토/                     사반·나단 검토 기록과 처리표
 ```
 
@@ -109,10 +118,11 @@ Claude Code에서:
 ```
 .claude-plugin/     플러그인·마켓플레이스 정의
 agents/             baruch, shaphan, nathan
-commands/           start, sinmungo-ask, docs, sinmungo-apply, registry, tax, check, status, law
+commands/           start, sinmungo-ask, docs, precheck, pdf, sinmungo-apply, registry, registry-check, tax, check, status, law
 skills/
   law-lookup/               법령 조회 (scripts/law.py)
   nonprofit-incorporation/  비영리 사단법인 설립 (references/, templates/)
+  registry-check/           등기 신청 사전 점검 (선행 신고·허가, 신청서 대조)
   cross-check/              상호 검토 절차
 ```
 

@@ -10,7 +10,7 @@ law-go-kr-obsidian(대한민국 법령 옵시디언 볼트, CC0)을 내려받아
   law.py meta 법령명            법령별 파일 목록과 공포·시행일
   law.py toc 법령명 [파일]      조문 제목 목록
   law.py art 법령명 조 [파일]   조문 본문 (예: art 민법 32 / art 법인세법 39 시행령 / art 법인세법 공익법인등의범위 시행규칙)
-  law.py grep 낱말 [법령명]     본문 검색
+  law.py grep 낱말 [법령명]     본문 검색 (머리말과 부칙은 뺀다)
 
 현행 법령 (법제처 Open API를 감싼 공개 서버 mcp.gomdori.app/law — 인터넷 필요):
   law.py live search 법령명              현행 법령 찾기 (MST, 공포일, 시행일)
@@ -130,8 +130,18 @@ def resolve(name):
         "\n".join("  " + nfc(p.name) for p in part[:30]))
 
 
+def rank(stem):
+    """법률 → 시행령·대통령령 → 시행규칙·부령·규칙 순서."""
+    stem = nfc(stem)
+    if stem.startswith("법률"):
+        return 0
+    if stem.startswith("시행령") or "대통령령" in stem:
+        return 1
+    return 2
+
+
 def files_of(law):
-    fs = sorted(law.glob("*.md"), key=lambda f: (ORDER.index(nfc(f.stem)) if nfc(f.stem) in ORDER else 9, nfc(f.name)))
+    fs = sorted(law.glob("*.md"), key=lambda f: (rank(f.stem), nfc(f.name)))
     if not fs:
         die(f"{nfc(law.name)}에 파일이 없습니다.")
     return fs
@@ -140,6 +150,9 @@ def files_of(law):
 def pick(law, which):
     fs = files_of(law)
     if which is None:
+        if len(fs) > 1:
+            print(f"※ {nfc(law.name)}에 파일이 {len(fs)}개 있습니다: " + ", ".join(nfc(f.stem) for f in fs) +
+                  f". 지금은 '{nfc(fs[0].stem)}'을 읽습니다. 다른 파일은 이름을 뒤에 붙이십시오.\n", file=sys.stderr)
         return fs[0]
     for f in fs:
         if squash(f.stem) == squash(which):
@@ -222,9 +235,18 @@ def grep(word, name=None):
     key, n = nfc(word), 0
     for law in targets:
         for f in files_of(law) if name else sorted(law.glob("*.md")):
-            cur = ""
+            cur, front_n, body = "", 0, True
             for line in f.read_text(encoding="utf-8").splitlines():
                 line = nfc(line)
+                if line.strip() == "---" and front_n < 2:
+                    front_n += 1
+                    continue
+                if front_n == 1:
+                    continue  # 머리말
+                if re.match(r"^#{1,6}\s*부\s*칙", line):
+                    body = False  # 부칙(타법개정 포함)부터는 건너뛴다
+                if not body:
+                    continue
                 h = HEAD.match(line)
                 if h:
                     cur = h.group(1)

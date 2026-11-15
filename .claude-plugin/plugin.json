@@ -1,6 +1,6 @@
 {
   "name": "baruch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "바룩 — 행정사·법무사에게 맡기던 서류 일을 본인이 직접 할 수 있게 돕는 에이전트. 첫 업무는 비영리 사단법인 설립과 기부금영수증 발행(공익법인 지정).",
   "author": {
     "name": "moomoogrange"
