@@ -7,6 +7,8 @@ import math
 FONT = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans CJK KR','NanumGothic',sans-serif"
 SCALES = (20, 30, 40, 50, 60, 100, 150, 200, 250, 300, 400, 500, 600, 800, 1000, 1200, 1500, 2000, 2500, 3000, 5000, 6000, 10000)
 AREA = (14, 30, 180, 166)               # 도면 자리: x, y, 너비, 높이
+CLIP = (10, 24, 186, 176)               # 도면과 바탕이 보이는 네모
+AREA_GAP = 0.02                         # 대장 면적과 도면에서 잰 넓이가 이보다 더 다르면 알린다
 PANEL_X, PANEL_R = 204, 285
 FILL = {"기존": "#EDEDED", "신설": "#F3E7C2", "칸": "none"}
 STROKE = {"기존": 0.35, "신설": 0.6, "칸": 0.2}
@@ -70,7 +72,8 @@ def all_points(spec, corners):
 
 def make_view(spec, corners):
     """도면 자리에 들어가는 가장 큰 표준 축척을 고르고 가운데에 놓는다."""
-    pts = all_points(spec, corners)
+    crop = spec.get("범위")
+    pts = [(crop[0], crop[1]), (crop[2], crop[3])] if crop else all_points(spec, corners)
     minx, maxx = min(p[0] for p in pts), max(p[0] for p in pts)
     miny, maxy = min(p[1] for p in pts), max(p[1] for p in pts)
     ax, ay, aw, ah = AREA
@@ -237,15 +240,18 @@ def summary_rows(y, buildings, corners, area):
         y += 5
         for b in group:
             head = f"{b['표']} {b['이름']}" + (f" · {b['용도']}" if b.get("용도") else "")
+            drawn = area(corners(b))
+            shown = b.get("대장면적") or drawn
             out += [text(PANEL_X, y, head, 2.5, "bold" if b["구분"] == "신설" else "normal", "start"),
-                    text(PANEL_R, y, f"{area(corners(b)):,.2f}㎡", 2.5, anchor="end")]
+                    text(PANEL_R, y, f"{shown:,.2f}㎡", 2.5, anchor="end")]
             size = f"{b['가로']:g} × {b['세로']:g}m" if "가로" in b else ""
-            detail = " · ".join(v for v in (b.get("구조", ""), size, b.get("설명", "")) if v)
+            ledger = f"대장 면적 (도면 {drawn:,.1f}㎡)" if b.get("대장면적") else ""
+            detail = " · ".join(v for v in (b.get("구조", ""), size, b.get("설명", ""), ledger) if v)
             if detail:
                 y += 3.6
                 out.append(text(PANEL_X + 3.5, y, detail, 2.1, anchor="start", fill="#444"))
             y += 4.8
-        total = sum(area(corners(b)) for b in group)
+        total = sum(b.get("대장면적") or area(corners(b)) for b in group)
         out += [line((PANEL_X, y - 2.6), (PANEL_R, y - 2.6), 0.2),
                 text(PANEL_X, y + 1.2, "바닥면적 합계", 2.5, "bold", "start"),
                 text(PANEL_R, y + 1.2, f"{total:,.2f}㎡", 2.5, "bold", "end")]
@@ -253,7 +259,7 @@ def summary_rows(y, buildings, corners, area):
     return out, y
 
 
-def panel(spec, buildings, scale, corners, area):
+def panel(spec, buildings, scale, corners, area, extra_notes=()):
     out = [text(PANEL_X, 20, spec["제목"], 4.4, "bold", "start")]
     y = 26
     head = [spec["주소"], spec.get("용도", ""), f"축척 1/{scale} (A4) · 치수 mm"]
@@ -265,9 +271,15 @@ def panel(spec, buildings, scale, corners, area):
     rows, y = summary_rows(y + 33, buildings, corners, area)
     out += rows
     if spec.get("대지면적"):
-        out.append(text(PANEL_X, y, f"대지면적 {spec['대지면적']:,g}㎡", 2.5, anchor="start"))
-        y += 6
-    notes = list(spec.get("주기", []))
+        source = f" ({spec['대지면적출처']})" if spec.get("대지면적출처") else ""
+        out.append(text(PANEL_X, y, f"대지면적 {spec['대지면적']:,g}㎡{source}", 2.5, anchor="start"))
+        y += 4
+        if spec.get("대지경계"):
+            measured = area([tuple(p) for p in spec["대지경계"]])
+            out.append(text(PANEL_X, y, f"경계선으로 잰 넓이 {measured:,.1f}㎡", 2.2, anchor="start", fill="#444"))
+            y += 4
+        y += 2
+    notes = list(spec.get("주기", [])) + list(extra_notes)
     notes += [f"위치 근거: {spec['위치근거']}"] if spec.get("위치근거") else []
     notes += ["신청인이 직접 그린 도면이며 측량 성과가 아님"]
     for note in notes:
@@ -281,9 +293,10 @@ def panel(spec, buildings, scale, corners, area):
     return out + ([text(PANEL_R, 199, foot, 2.3, anchor="end")] if foot else [])
 
 
-def render(spec, corners, area):
-    """도면 한 장의 SVG 글과 고른 축척을 돌려준다."""
+def render(spec, corners, area, background=None):
+    """도면 한 장의 SVG 글과 고른 축척을 돌려준다. background는 바탕 지도를 만드는 함수(없어도 된다)."""
     view = make_view(spec, corners)
+    under, extra_notes, halo = background(spec, view, CLIP, lambda pt: to_page(view, pt)) if background else ([], [], False)
     buildings = tag_buildings(spec)
     floor_plan = spec["종류"] == "평면도"
     body = extra_marks(view, spec, corners)
@@ -300,6 +313,13 @@ def render(spec, corners, area):
     frame = ('<rect width="297" height="210" fill="#fff"/>'
              '<rect x="8" y="8" width="281" height="194" fill="none" stroke="#222" stroke-width="0.5"/>'
              + line((198, 8), (198, 202), 0.3))
+    cx, cy, cw, ch = CLIP
+    style = "<style>.halo text{paint-order:stroke;stroke:#fff;stroke-width:0.9px;stroke-linejoin:round}</style>"
+    clip = (f'{style}<defs><clipPath id="drawing"><rect x="{cx}" y="{cy}" width="{cw}" height="{ch}"/></clipPath></defs>'
+            '<g clip-path="url(#drawing)">' + "".join(under)
+            + f'<g class="{"halo" if halo else ""}">' + "".join(body) + "</g></g>")
+    cropped = [text(AREA[0], 20, "대지의 일부만 그린 도면 (범위 밖은 생략)", 2.4, anchor="start", fill="#444")] if spec.get("범위") else []
     svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210">'
-           + frame + "".join(body) + "".join(panel(spec, buildings, view["scale"], corners, area)) + "</svg>")
+           + frame + clip + "".join(cropped)
+           + "".join(panel(spec, buildings, view["scale"], corners, area, extra_notes)) + "</svg>")
     return svg, view["scale"]

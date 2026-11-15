@@ -18,15 +18,19 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from geo import VworldError  # noqa: E402
 from sheet import render  # noqa: E402
 
 KINDS = ("배치도", "평면도", "현황도")
 GROUPS = ("기존", "신설", "칸")
 WALLS = ("아래", "오른쪽", "위", "왼쪽")
 NORTH = {"위": 0, "오른쪽": 90, "아래": 180, "왼쪽": 270}
+BASEMAPS = ("항공사진", "지도", "지적도")
+AREA_GAP = 0.02                                # 대장 면적과 도면에서 잰 넓이가 이보다 더 다르면 알린다
 
 EXAMPLES = {
     "배치도": {
@@ -188,6 +192,18 @@ def extra_errors(spec):
     border = spec.get("대지경계")
     if border is not None and not (isinstance(border, list) and len(border) >= 3 and all(is_point(p) for p in border)):
         out.append("대지경계는 [x, y] 셋 이상이어야 합니다.")
+    kinds = [spec["바탕"]] if isinstance(spec.get("바탕"), str) else list(spec.get("바탕") or [])
+    if any(k not in BASEMAPS for k in kinds):
+        out.append(f"바탕은 {' · '.join(BASEMAPS)} 가운데서 고릅니다.")
+    if kinds and not isinstance(spec.get("원점"), dict):
+        out.append("바탕을 깔려면 원점이 있어야 합니다. 먼저 parcel.py into 로 필지 경계를 받아 넣으십시오.")
+    for key in ("대지면적",):
+        if key in spec and (not is_num(spec[key]) or spec[key] <= 0):
+            out.append(f"{key}은 0보다 큰 숫자(제곱미터)여야 합니다.")
+    crop = spec.get("범위")
+    if crop is not None and not (isinstance(crop, list) and len(crop) == 4 and all(is_num(v) for v in crop)
+                                 and crop[0] < crop[2] and crop[1] < crop[3]):
+        out.append("범위는 [왼쪽 x, 아래 y, 오른쪽 x, 위 y] 네 숫자입니다.")
     return out
 
 
@@ -208,6 +224,30 @@ def errors(spec):
     return out + building_errors(spec) + extra_errors(spec)
 
 
+def area_warnings(spec):
+    """대장에 적힌 면적과 도면에서 잰 넓이를 맞춰 본다. 기준은 대장이다."""
+    out = []
+    border, registered = spec.get("대지경계"), spec.get("대지면적")
+    if border and registered:
+        measured = area([tuple(p) for p in border])
+        if abs(measured - registered) / registered > AREA_GAP:
+            out.append(f"대지경계선으로 잰 넓이({measured:,.1f}㎡)가 대지면적({registered:,g}㎡)과 "
+                       f"{abs(measured - registered) / registered * 100:.1f}% 다릅니다. 경계나 면적 가운데 하나가 맞지 않습니다. "
+                       "토지대장·임야대장과 지적도 등본으로 확인하십시오.")
+    elif border and not registered:
+        out.append("대지면적이 없습니다. 토지대장·임야대장의 면적을 적으십시오 (parcel.py into 가 채워 줍니다).")
+    for b in spec["건물"]:
+        ledger = b.get("대장면적")
+        if not ledger:
+            continue
+        drawn = area(corners(b))
+        if abs(drawn - ledger) / ledger > AREA_GAP:
+            out.append(f"'{b['이름']}'을 그린 넓이({drawn:,.1f}㎡)가 건축물대장 면적({ledger:,g}㎡)과 "
+                       f"{abs(drawn - ledger) / ledger * 100:.1f}% 다릅니다. 치수를 다시 재거나, 대장과 실제가 다른 까닭"
+                       "(증축, 일부 철거, 처마)을 확인하십시오.")
+    return out
+
+
 def warnings(spec):
     out = []
     buildings = [(b, corners(b)) for b in spec["건물"] if b["구분"] != "칸"]
@@ -222,6 +262,11 @@ def warnings(spec):
                 if not all(inside(p, polygon) for p in pts)]
     elif spec["종류"] == "배치도":
         out.append("대지경계를 그리지 않았습니다. 경계선에서 건물까지의 거리를 보려는 관청이 많습니다.")
+    out += area_warnings(spec)
+    crop = spec.get("범위")
+    if crop:
+        out += [f"'{b['이름']}'이 그리는 범위 밖에 있습니다." for b, pts in buildings
+                if not all(crop[0] <= x <= crop[2] and crop[1] <= y <= crop[3] for x, y in pts)]
     if spec["종류"] == "배치도" and not any(m.get("종류") == "도로" for m in spec.get("표시", [])):
         out.append("도로 표시가 없습니다. 대지에 닿은 도로나 진입로가 있으면 너비와 함께 그립니다.")
     if spec["종류"] == "배치도" and not spec.get("치수"):
@@ -277,7 +322,13 @@ def export(svg, pdf, png, browser):
 def make(path, outdir):
     spec = load(path)
     notes = warnings(spec)
-    svg, scale = render(spec, corners, area)
+    background = None
+    if spec.get("바탕"):
+        from basemap import background              # 바탕을 쓸 때만 인터넷과 인증키가 필요하다
+    try:
+        svg, scale = render(spec, corners, area, background)
+    except (urllib.error.URLError, TimeoutError, OSError, VworldError) as e:
+        die(f"바탕 지도를 받지 못했습니다 ({e}).\n인터넷 연결과 브이월드 인증키를 확인하거나, 도면 파일에서 '바탕'을 지우고 다시 그리십시오.")
     out = Path(outdir) if outdir else Path(path).resolve().parent
     out.mkdir(parents=True, exist_ok=True)
     stem = Path(path).stem
