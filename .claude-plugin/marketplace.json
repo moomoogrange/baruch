@@ -1,0 +1,11 @@
+{
+  "name": "baruch",
+  "owner": { "name": "moomoogrange" },
+  "plugins": [
+    {
+      "name": "baruch",
+      "source": "./",
+      "description": "본인 신청 서류 도우미 — 비영리 사단법인 설립, 설립등기, 기부금영수증 발행(공익법인 지정)"
+    }
+  ]
+}
