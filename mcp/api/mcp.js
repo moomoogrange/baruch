@@ -166,7 +166,7 @@ async function callTool(name, a) {
       const others = hits.slice(1, 5).filter((h) => h.score >= top.score * 0.5);
       let out = '';
       if (others.length) out += `> 이 이름에 걸리는 카드가 더 있다. 지금 보여 주는 것은 「${top.c.name}」(area: ${top.a.id})이다. 다른 카드: ${others.map((h) => `「${h.c.name}」(area: ${h.a.id})`).join(', ')}. 사정에 맞는 카드를 area와 함께 다시 불러 읽는다. 여러 카드가 함께 걸리는 일이 흔하다.\n\n`;
-      out += `# ${top.a.title}\n\n${top.a.head}\n\n`;
+      out += `${top.a.head}\n\n`;
       if (a.with_intro) out += `${top.a.intro}\n\n---\n\n`;
       out += top.c.text;
       return out;
