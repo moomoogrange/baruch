@@ -4,24 +4,39 @@
 law-go-kr-obsidian(대한민국 법령 옵시디언 볼트, CC0)을 내려받아
 법령 이름 찾기와 조문 뽑기를 한다. 표준 라이브러리만 쓴다.
 
-  law.py setup                 법령 저장소 내려받기 또는 최신으로 갱신
+  law.py setup                 법령 저장소 내려받기 또는 최신으로 갱신 (update 도 같다. 7일마다 자동 갱신)
   law.py where                 법령 저장소 위치와 기준일
   law.py find 키워드 [키워드]   법령 이름 찾기 (모든 키워드를 포함)
   law.py meta 법령명            법령별 파일 목록과 공포·시행일
   law.py toc 법령명 [파일]      조문 제목 목록
   law.py art 법령명 조 [파일]   조문 본문 (예: art 민법 32 / art 법인세법 39 시행령 / art 법인세법 공익법인등의범위 시행규칙)
   law.py grep 낱말 [법령명]     본문 검색
+
+현행 법령 (법제처 Open API를 감싼 공개 서버 mcp.gomdori.app/law — 인터넷 필요):
+  law.py live search 법령명              현행 법령 찾기 (MST, 공포일, 시행일)
+  law.py live art 법령명 제32조          현행 조문. 가지번호도 그대로 (제18조의3)
+  law.py live art 법령명 제32조 20240101  그날 시행 중이던 조문
+  law.py live annex 법령명 [별표번호]     별표·서식
+  law.py live call 도구이름 '{"인자":"값"}'  그 밖의 도구 (live tools 로 목록)
+
+인증키: 환경변수 LAW_OC 가 있으면 본인 한도로, 없으면 공용 한도로 조회한다.
 """
+import json
 import os
 import re
 import subprocess
 import sys
+import time
 import unicodedata
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 REPO = "https://github.com/moomoogrange/law-go-kr-obsidian.git"
 HOME = Path(os.environ.get("BARUCH_LAW_DIR", Path.home() / ".local/share/baruch/law-go-kr-obsidian"))
 ORDER = ["법률", "시행령", "시행규칙"]
+LIVE = os.environ.get("BARUCH_LAW_SERVER", "https://mcp.gomdori.app/law")
+STALE_DAYS = 7
 
 
 def nfc(s):
@@ -38,10 +53,32 @@ def die(msg):
     sys.exit(1)
 
 
+def refresh():
+    """내려받은 지 오래됐으면 조용히 최신으로 맞춘다. 실패해도 조회는 계속한다."""
+    mark = HOME / ".git" / "FETCH_HEAD"
+    try:
+        ref = mark if mark.exists() else HOME / ".git" / "HEAD"
+        if not ref.exists() or time.time() - ref.stat().st_mtime < STALE_DAYS * 86400:
+            return
+        subprocess.run(["git", "-C", str(HOME), "pull", "--ff-only", "--quiet"],
+                       timeout=60, capture_output=True, check=False)
+        mark.touch()
+    except Exception:
+        pass
+
+
+_refreshed = False
+
+
 def law_root():
+    global _refreshed
     root = HOME / "법령"
     if not root.is_dir():
-        die(f"법령 저장소가 없습니다: {HOME}\n먼저 실행하십시오: python3 {Path(__file__).resolve()} setup")
+        die(f"법령 저장소가 없습니다: {HOME}\n먼저 실행하십시오: python3 {Path(__file__).resolve()} setup\n"
+            "저장소 없이 현행 조문만 보려면: law.py live art 법령명 제○조")
+    if not _refreshed:
+        _refreshed = True
+        refresh()
     return root
 
 
@@ -62,7 +99,7 @@ def where():
                           capture_output=True, text=True).stdout.strip()
     print(f"위치: {HOME}")
     print(f"저장소 마지막 갱신: {last or '알 수 없음'}")
-    print("주의: 이 날짜 뒤에 바뀐 법령은 반영되어 있지 않습니다. 제출 전 law.go.kr에서 현행 조문을 확인하십시오.")
+    print("주의: 이 날짜 뒤에 바뀐 법령은 반영되어 있지 않습니다. 서류에 쓰기 전에 `law.py live art 법령명 제○조`로 현행 조문을 확인하십시오.")
 
 
 def all_laws():
@@ -201,6 +238,97 @@ def grep(word, name=None):
         die("찾지 못했습니다.")
 
 
+# ── 현행 법령 (공개 서버) ────────────────────────────────────────────
+
+def _post(body, sid=None):
+    h = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream"}
+    if sid:
+        h["mcp-session-id"] = sid
+    oc = os.environ.get("LAW_OC", "").strip()
+    if oc:
+        h["apikey"] = oc
+    req = urllib.request.Request(LIVE, json.dumps(body).encode(), h)
+    with urllib.request.urlopen(req, timeout=120) as r:
+        sid = r.headers.get("mcp-session-id") or sid
+        txt = r.read().decode()
+    out = None
+    for line in txt.splitlines():
+        if line.startswith("data: "):
+            out = json.loads(line[6:])
+    if out is None and txt.strip().startswith("{"):
+        out = json.loads(txt)
+    return out, sid
+
+
+def _session():
+    _, sid = _post({"jsonrpc": "2.0", "id": 0, "method": "initialize", "params": {
+        "protocolVersion": "2025-03-26", "capabilities": {},
+        "clientInfo": {"name": "baruch-law", "version": "1"}}})
+    try:
+        _post({"jsonrpc": "2.0", "method": "notifications/initialized"}, sid)
+    except Exception:
+        pass
+    return sid
+
+
+def live_call(tool, args, sid=None):
+    sid = sid or _session()
+    d, _ = _post({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                  "params": {"name": tool, "arguments": args}}, sid)
+    r = (d or {}).get("result", d or {})
+    texts = [c["text"] for c in r.get("content", []) if c.get("type") == "text"]
+    return "\n".join(texts) if texts else json.dumps(r, ensure_ascii=False)[:4000]
+
+
+def live_find(name, sid):
+    """법령명으로 현행 법령의 MST를 찾는다. 정확히 같은 이름을 먼저 고른다."""
+    txt = live_call("search_law", {"query": name, "display": 10}, sid)
+    best, key = None, squash(name)
+    for m in re.finditer(r"^\s*\d+\.\s*(.+?)\s*\[(.+?)\]\s*\n(?:.*\n){0,2}?.*MST:\s*(\d+)", txt, re.M):
+        title, state, mst = m.group(1), m.group(2), m.group(3)
+        if squash(title) == key:
+            return mst, title, txt
+        best = best or (mst, title, txt)
+    if not best:
+        die(f"'{name}'을 현행 법령에서 찾지 못했습니다.\n{txt[:600]}")
+    return best
+
+
+def live(rest):
+    if not rest:
+        die(__doc__)
+    sub, a = rest[0], rest[1:]
+    try:
+        if sub == "tools":
+            sid = _session()
+            d, _ = _post({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, sid)
+            for t in d["result"]["tools"]:
+                print(t["name"], "—", t["description"][:110].replace("\n", " "))
+        elif sub == "search" and a:
+            print(live_call("search_law", {"query": " ".join(a), "display": 10}))
+        elif sub == "art" and len(a) >= 2:
+            sid = _session()
+            mst, title, _ = live_find(a[0], sid)
+            args = {"mst": mst, "jo": a[1] if a[1].startswith("제") else f"제{a[1]}조".replace("조조", "조")}
+            if len(a) >= 3:
+                args["efYd"] = a[2]
+            print(f"[현행 조회 · {title} · MST {mst}" + (f" · 기준일 {a[2]}" if len(a) >= 3 else "") + "]")
+            print(live_call("get_law_text", args, sid))
+        elif sub == "annex" and a:
+            args = {"lawName": a[0]}
+            if len(a) >= 2:
+                args["annexNo"] = a[1]
+            print(live_call("get_annexes", args))
+        elif sub == "call" and a:
+            print(live_call(a[0], json.loads(a[1]) if len(a) >= 2 else {}))
+        else:
+            die(__doc__)
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        die(f"현행 법령 서버에 닿지 못했습니다 ({e}).\n"
+            "인터넷 연결을 확인하거나, 내려받은 저장소로 조회하십시오 (law.py art …). "
+            "저장소로 읽은 조문은 law.go.kr에서 현행 여부를 확인해야 합니다.")
+
+
 def main():
     a = sys.argv[1:]
     if not a or a[0] in ("-h", "--help", "help"):
@@ -208,8 +336,10 @@ def main():
         return
     cmd, rest = a[0], a[1:]
     try:
-        if cmd == "setup":
+        if cmd in ("setup", "update"):
             setup()
+        elif cmd == "live":
+            live(rest)
         elif cmd == "where":
             where()
         elif cmd == "find" and rest:

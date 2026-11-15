@@ -1,10 +1,39 @@
 {
   "name": "baruch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "바룩 — 행정사·법무사에게 맡기던 서류 일을 본인이 직접 할 수 있게 돕는 에이전트. 첫 업무는 비영리 사단법인 설립과 기부금영수증 발행(공익법인 지정).",
-  "author": { "name": "moomoogrange" },
+  "author": {
+    "name": "moomoogrange"
+  },
   "homepage": "https://github.com/moomoogrange/baruch",
   "repository": "https://github.com/moomoogrange/baruch",
   "license": "MIT",
-  "keywords": ["korea", "law", "nonprofit", "비영리법인", "사단법인", "기부금영수증", "행정사", "법무사"]
+  "keywords": [
+    "korea",
+    "law",
+    "nonprofit",
+    "비영리법인",
+    "사단법인",
+    "기부금영수증",
+    "행정사",
+    "법무사"
+  ],
+  "mcpServers": {
+    "korean-law": {
+      "type": "http",
+      "url": "https://mcp.gomdori.app/law",
+      "headers": {
+        "apikey": "${user_config.law_oc}"
+      }
+    }
+  },
+  "userConfig": {
+    "law_oc": {
+      "type": "string",
+      "title": "법제처 Open API 인증키 (선택)",
+      "description": "비워 두면 공용 한도로 동작합니다. https://open.law.go.kr 에서 무료로 받은 인증키(OC)를 넣으면 본인 한도로 조회합니다.",
+      "sensitive": true,
+      "default": ""
+    }
+  }
 }
