@@ -111,7 +111,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 | `/baruch:check` | 사반과 나단의 상호 검토 |
 | `/baruch:pdf` | 제출용 PDF 만들기 |
 | `/baruch:docx` | 직접 고칠 워드 파일 만들기. 초안을 워드 파일로 열어 직접 타이핑해 고치고, 고친 내용을 다시 읽어 옵니다. [이음오피스](https://ieumoffice.com)가 깔려 있어야 합니다 |
-| `/baruch:form 식품위생법 시행규칙 37` | 관청 서식 받기. 법령에 딸린 신청서·신고서 서식 원본(한글·PDF)을 법제처에서 받고, 칸마다 적을 내용을 정리합니다. 이음오피스가 있으면 서식을 열어 직접 적습니다 |
+| `/baruch:form 식품위생법 시행규칙 37` | 서식 받기. 법령에 딸린 신청서·신고서 서식 원본(한글·PDF)은 법제처에서, 등기신청서와 인감 신고서 같은 등기소 양식은 인터넷등기소에서 받고, 칸마다 적을 내용을 정리합니다. 이음오피스가 있으면 서식을 열어 직접 적습니다 |
 | `/baruch:registry-check 대표이사 변경등기` | 등기 신청 사전 점검입니다. 등기 전에 받을 서류를 찾고 신청서를 칸별로 대조합니다 |
 | `/baruch:status` | 진행 상황, 기한, 접수번호와 회신 기록 |
 | `/baruch:law 민법 32` | 법령 조회 |
@@ -245,7 +245,7 @@ skills/
   judicial-affairs/         법원·등기소에 내는 일의 업무 카드 (references/ 6개 영역)
   case-file/                공문이 오가는 일을 사건으로 관리 (기한 장부, 증거 보관, 단체의 일)
   law-lookup/               법령 조회 (scripts/law.py)
-  office-doc/               직접 고칠 워드 파일 만들기와 다시 읽기 (이음오피스), 관청 서식 원본 받기 (scripts/forms.py), 서식 목록
+  office-doc/               직접 고칠 워드 파일 만들기와 다시 읽기 (이음오피스), 관청 서식과 등기소 양식 원본 받기 (scripts/forms.py), 서식 목록
   building-lookup/          건축물대장·인허가 조회 (scripts/arch.py)
   site-drawing/             배치도·평면도·현황도 (scripts/draw.py), 필지 경계와 대장 면적 (parcel.py), 바탕 지도 (basemap.py), 경사 참고도 (slope.py)
   nonprofit-incorporation/  비영리 사단법인 설립 (references/, templates/)
@@ -257,4 +257,4 @@ skills/
 
 ## 라이선스
 
-MIT 라이선스입니다. 법령 원문은 직접 만든 법령 저장소 law-go-kr-obsidian(CC0)과 법제처 Open API에서 가져옵니다. 관청 서식 원본은 국가법령정보센터(law.go.kr)에서 받습니다. 필지 경계, 대장 면적, 건물 윤곽, 항공사진은 브이월드(국토교통부 공간정보 오픈플랫폼)에서, 경사 참고도의 표고 자료는 Mapzen Terrain Tiles(AWS Open Data)에서 받습니다. 현행 조회에는 류주임(chrisryugj)이 만든 korean-law-mcp(MIT) 공개 서버를, 건축물 조회에는 같은 분이 만든 archhub-mcp(MIT) 공개 서버를 씁니다. 바룩에서 남이 만든 것은 이 두 서버뿐입니다. 초안을 워드 파일로 열어 직접 고치는 기능은 pblsketch가 만든 [이음오피스](https://github.com/pblsketch/ieumoffice)(Apache-2.0)를 쓰는데, 바룩에 들어 있지 않고 쓰는 분이 따로 깝니다.
+MIT 라이선스입니다. 법령 원문은 직접 만든 법령 저장소 law-go-kr-obsidian(CC0)과 법제처 Open API에서 가져옵니다. 관청 서식 원본은 국가법령정보센터(law.go.kr)에서, 등기소 양식은 인터넷등기소(iros.go.kr) 자료센터에서 받습니다. 필지 경계, 대장 면적, 건물 윤곽, 항공사진은 브이월드(국토교통부 공간정보 오픈플랫폼)에서, 경사 참고도의 표고 자료는 Mapzen Terrain Tiles(AWS Open Data)에서 받습니다. 현행 조회에는 류주임(chrisryugj)이 만든 korean-law-mcp(MIT) 공개 서버를, 건축물 조회에는 같은 분이 만든 archhub-mcp(MIT) 공개 서버를 씁니다. 바룩에서 남이 만든 것은 이 두 서버뿐입니다. 초안을 워드 파일로 열어 직접 고치는 기능은 pblsketch가 만든 [이음오피스](https://github.com/pblsketch/ieumoffice)(Apache-2.0)를 쓰는데, 바룩에 들어 있지 않고 쓰는 분이 따로 깝니다.

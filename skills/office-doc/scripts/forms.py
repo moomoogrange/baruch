@@ -10,10 +10,18 @@
   forms.py get  "…" 37 -o 업무/식당-영업신고/서식   받을 폴더 (기본: 지금 폴더의 서식/)
   forms.py get  "…" 별표1                       별표도 같은 방법으로 받는다
 
+등기소에 내는 신청서 양식은 인터넷등기소(iros.go.kr) 자료센터의 등기신청양식에서 받는다.
+
+  forms.py iros list 인감                       제목에 낱말이 든 등기신청양식
+  forms.py iros list --cat 법인등기              구분별 전체 (부동산등기, 법인등기, 동산·채권담보등기, 기타등기)
+  forms.py iros get 1597 -o 업무/…/서식          목록에 나온 번호로 받기 (기본 한글 파일)
+  forms.py iros get 인감카드계속사용 --ext docx   제목 낱말로 받기. 하나로 좁혀지지 않으면 목록을 보여 준다
+
 받은 파일 맨 위의 개정일을 읽어 지금 시행 중인 서식인지 확인한다. 법령 이름은
-law.go.kr에 적힌 그대로 넣는다(예: "식품위생법 시행규칙"). 법원·등기소의 양식과
+law.go.kr에 적힌 그대로 넣는다(예: "식품위생법 시행규칙"). 법원의 소송 양식과
 고시·훈령의 서식은 여기서 받을 수 없다.
 """
+import json
 import argparse
 import re
 import sys
@@ -156,6 +164,97 @@ def cmd_get(a):
     print("  낼 때는 파일 맨 위의 개정일이 지금 시행 중인 것과 같은지 확인하십시오.")
 
 
+IROS = "https://www.iros.go.kr"
+
+
+def iros_post(path, payload, raw=False):
+    req = urllib.request.Request(IROS + path, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                                 headers={**UA, "Content-Type": "application/json; charset=UTF-8"})
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=40) as r:
+                b = r.read()
+                return (b, r.headers) if raw else json.loads(b.decode("utf-8", "replace"))
+        except Exception as e:
+            err = e
+            time.sleep(1.5 * (attempt + 1))
+    die(f"인터넷등기소에 닿지 못했습니다 ({err}). 잠시 뒤 다시 하거나 누리집 자료센터에서 직접 받으십시오.")
+
+
+def iros_rows(word="", cat="전체"):
+    """등기신청양식 게시판. 한 번에 10건씩 온다."""
+    rows, page = [], 1
+    while True:
+        d = iros_post("/biz/Pm10P0BltbdPerMngCtrl/retrieveBltbdPerList.do",
+                      {"websquare_param": {"board_type_id": "4", "swrd": word, "srch_cls_cd": "",
+                                           "board_category": cat, "pageIndex": page, "top10_category_yn": "N"}})
+        rows += d.get("dataList") or []
+        if page >= int((d.get("paginationInfo") or {}).get("totalPageCount") or 1):
+            return rows
+        page += 1
+        time.sleep(0.3)
+
+
+def iros_files(r):
+    return [(r.get(f"att_file_ext{i}"), r.get(f"att_file_id{i}"), r.get(f"att_file_name{i}"))
+            for i in range(1, 6) if r.get(f"att_file_id{i}")]
+
+
+def iros_line(r):
+    return f"  {r['board_id']}  [{r['board_category']}] {r['board_title']}  ({', '.join(e for e, _, _ in iros_files(r))})"
+
+
+def cmd_iros_list(a):
+    rows = iros_rows(unicodedata.normalize("NFC", a.word or ""), a.cat)
+    for r in rows:
+        print(iros_line(r))
+    print(f"({len(rows)}건. 받기: forms.py iros get 번호)")
+
+
+def cmd_iros_get(a):
+    key = unicodedata.normalize("NFC", a.key).strip()
+    if key.isdigit():
+        hit = [r for r in iros_rows() if str(r["board_id"]) == key] if not a.word else []
+        if not hit:
+            die(f"번호 {key}인 양식이 없습니다. `forms.py iros list 낱말`로 번호를 확인하십시오.")
+    else:
+        rows = iros_rows(key)
+        if not rows:  # 띄어쓰기가 다를 수 있어 전체에서 다시 찾는다
+            flat = key.replace(" ", "")
+            rows = [r for r in iros_rows() if flat in r["board_title"].replace(" ", "")]
+        hit = rows
+        if len(hit) != 1:
+            if not hit:
+                die(f"'{key}'가 든 등기신청양식이 없습니다.")
+            print("하나로 좁혀지지 않습니다. 번호로 다시 받으십시오:")
+            for r in hit:
+                print(iros_line(r))
+            sys.exit(1)
+    r = hit[0]
+    files = iros_files(r)
+    pick = [f for f in files if f[0] == a.ext] or [f for f in files if f[0] in ("hwp", "hwpx")] or files
+    if not pick:
+        die("이 양식에는 붙은 파일이 없습니다.")
+    ext, fid, fname = pick[0]
+    if ext != a.ext:
+        print(f"{a.ext} 파일이 없어 {ext} 파일로 받습니다.")
+    data, _ = iros_post("/biz/Pm10P0FileDownMngCtrl/retrievePostsFileDown.do",
+                        {"websquare_param": {"board_type_id": "4", "file_type": "B",
+                                             "object_id": str(r["board_id"]), "file_id": str(fid)}}, raw=True)
+    if data[:1] == b"{" or len(data) < 500:
+        die("받은 것이 양식 파일이 아닙니다. 인터넷등기소 자료센터에서 직접 받으십시오.")
+    out = Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r'[\\/:*?"<>|]', "", r["board_title"]).strip()[:70]
+    path = out / unicodedata.normalize("NFC", f"등기신청양식 {safe}.{ext}")
+    if path.exists() and not a.force:
+        die(f"이미 있습니다: {path}\n신청인이 적던 파일일 수 있으니 확인한 뒤 --force로 다시 받으십시오.")
+    path.write_bytes(data)
+    print(f"받았습니다: {path}")
+    print(f"  인터넷등기소 자료센터 등기신청양식 · [{r['board_category']}] {r['board_title']} · 올린 날 {r.get('create_don')} · 받은 날 {time.strftime('%Y-%m-%d')}")
+    print("  양식은 예규가 바뀌면 함께 바뀝니다. 낼 때 다시 받고, 등기소 창구 양식과 다르면 창구 것을 씁니다.")
+
+
 def main():
     ap = argparse.ArgumentParser(description="관청 서식 원본을 law.go.kr에서 찾아 받는다")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -171,8 +270,21 @@ def main():
     p.add_argument("--pdf", action="store_true")
     p.add_argument("--force", action="store_true")
     p.set_defaults(fn=cmd_get)
+    p = sub.add_parser("iros", help="인터넷등기소 등기신청양식")
+    isub = p.add_subparsers(dest="icmd", required=True)
+    q = isub.add_parser("list", help="양식 목록")
+    q.add_argument("word", nargs="?")
+    q.add_argument("--cat", default="전체", help="부동산등기 / 법인등기 / 동산·채권담보등기 / 기타등기")
+    q.set_defaults(fn=cmd_iros_list)
+    q = isub.add_parser("get", help="양식 받기")
+    q.add_argument("key", help="목록의 번호 또는 제목 낱말")
+    q.add_argument("-o", "--out", default="서식")
+    q.add_argument("--ext", default="hwp", help="hwp / docx / pdf / odt")
+    q.add_argument("--force", action="store_true")
+    q.set_defaults(fn=cmd_iros_get, word=None)
     a = ap.parse_args()
-    a.law = unicodedata.normalize("NFC", a.law).strip()
+    if getattr(a, "law", None):
+        a.law = unicodedata.normalize("NFC", a.law).strip()
     a.fn(a)
 
 
