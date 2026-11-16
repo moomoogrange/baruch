@@ -81,6 +81,7 @@ https://baruch-ebon.vercel.app/mcp
 대화창에서 쓸 때는 Claude Code와 다른 점이 있습니다.
 
 - 서류를 폴더에 파일로 쌓지 않고 대화 안에서 한 건씩 써 줍니다. 파일 만들기 기능이 있는 AI라면 문서나 PDF로 받을 수 있습니다.
+- [이음오피스](https://github.com/pblsketch/ieumoffice)를 같은 대화에 함께 연결해 두면 초안을 워드 파일로 받아 직접 타이핑해 고칠 수 있습니다. 고친 파일을 다시 올리면 달라진 곳을 확인하고 이어 갑니다.
 - 검토를 맡을 에이전트가 따로 없어서, 같은 AI가 대조하는 역할과 받는 쪽 역할을 차례로 맡아 스스로 검토합니다.
 - 건축물대장 조회와 배치도·평면도 그리기도 대화창에서 됩니다. 도면은 SVG로 오고, 브라우저로 열어 A4 가로로 인쇄해 PDF로 저장합니다. 경사는 그림 없이 숫자로만 알려 줍니다.
 - 지번으로 필지 경계와 대장 면적을 받는 것, 항공사진·지적도를 바탕에 까는 것은 대화창에서 되지 않습니다. 본인 브이월드 인증키가 필요해서 Claude Code 플러그인에서만 씁니다.
@@ -95,7 +96,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 /plugin install baruch@baruch
 ```
 
-파이썬 3과 git이 필요하고, PDF를 만들려면 크롬이나 엣지도 깔려 있어야 합니다. 법령 저장소(약 65MB)는 처음 쓸 때 `~/.local/share/baruch/law-go-kr-obsidian`에 내려받습니다. 이미 받아 둔 사본이 있으면 `BARUCH_LAW_DIR` 환경변수로 그 폴더를 가리키면 됩니다.
+파이썬 3과 git이 필요하고, PDF를 만들려면 크롬이나 엣지도 깔려 있어야 합니다. 초안을 워드 파일로 열어 직접 고치려면 [이음오피스](https://ieumoffice.com)(무료, 오픈소스)를 따로 깝니다. 없어도 나머지는 그대로 됩니다. 법령 저장소(약 65MB)는 처음 쓸 때 `~/.local/share/baruch/law-go-kr-obsidian`에 내려받습니다. 이미 받아 둔 사본이 있으면 `BARUCH_LAW_DIR` 환경변수로 그 폴더를 가리키면 됩니다.
 
 ## 쓰는 법
 
@@ -108,6 +109,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 | `/baruch:precheck` | 담당자가 물을 질문에 미리 답과 증빙을 채우는 사전 보완 점검입니다 |
 | `/baruch:check` | 사반과 나단의 상호 검토 |
 | `/baruch:pdf` | 제출용 PDF 만들기 |
+| `/baruch:docx` | 직접 고칠 워드 파일 만들기. 초안을 워드 파일로 열어 직접 타이핑해 고치고, 고친 내용을 다시 읽어 옵니다. [이음오피스](https://ieumoffice.com)가 깔려 있어야 합니다 |
 | `/baruch:registry-check 대표이사 변경등기` | 등기 신청 사전 점검입니다. 등기 전에 받을 서류를 찾고 신청서를 칸별로 대조합니다 |
 | `/baruch:status` | 진행 상황, 기한, 접수번호와 회신 기록 |
 | `/baruch:law 민법 32` | 법령 조회 |
@@ -231,7 +233,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 ```
 .claude-plugin/     플러그인·마켓플레이스 정의
 agents/             baruch, shaphan, nathan
-commands/           work, case, precheck, check, pdf, registry-check, status, law, building, drawing,
+commands/           work, case, precheck, check, pdf, docx, registry-check, status, law, building, drawing,
                     start, sinmungo-ask, docs, sinmungo-apply, registry, tax (비영리 사단법인)
 mcp/                Claude·ChatGPT 연결 서버 (api/mcp.js, 도면 함수 api/drawing.py, 대화창용 규칙, 배포 스크립트)
 docs/               소개 쪽
@@ -241,6 +243,7 @@ skills/
   judicial-affairs/         법원·등기소에 내는 일의 업무 카드 (references/ 6개 영역)
   case-file/                공문이 오가는 일을 사건으로 관리 (기한 장부, 증거 보관, 단체의 일)
   law-lookup/               법령 조회 (scripts/law.py)
+  office-doc/               직접 고칠 워드 파일 만들기와 다시 읽기 (이음오피스)
   building-lookup/          건축물대장·인허가 조회 (scripts/arch.py)
   site-drawing/             배치도·평면도·현황도 (scripts/draw.py), 필지 경계와 대장 면적 (parcel.py), 바탕 지도 (basemap.py), 경사 참고도 (slope.py)
   nonprofit-incorporation/  비영리 사단법인 설립 (references/, templates/)
@@ -252,4 +255,4 @@ skills/
 
 ## 라이선스
 
-MIT 라이선스입니다. 법령 원문은 직접 만든 법령 저장소 law-go-kr-obsidian(CC0)과 법제처 Open API에서 가져옵니다. 필지 경계, 대장 면적, 건물 윤곽, 항공사진은 브이월드(국토교통부 공간정보 오픈플랫폼)에서, 경사 참고도의 표고 자료는 Mapzen Terrain Tiles(AWS Open Data)에서 받습니다. 현행 조회에는 류주임(chrisryugj)이 만든 korean-law-mcp(MIT) 공개 서버를, 건축물 조회에는 같은 분이 만든 archhub-mcp(MIT) 공개 서버를 씁니다. 바룩에서 남이 만든 것은 이 두 서버뿐입니다.
+MIT 라이선스입니다. 법령 원문은 직접 만든 법령 저장소 law-go-kr-obsidian(CC0)과 법제처 Open API에서 가져옵니다. 필지 경계, 대장 면적, 건물 윤곽, 항공사진은 브이월드(국토교통부 공간정보 오픈플랫폼)에서, 경사 참고도의 표고 자료는 Mapzen Terrain Tiles(AWS Open Data)에서 받습니다. 현행 조회에는 류주임(chrisryugj)이 만든 korean-law-mcp(MIT) 공개 서버를, 건축물 조회에는 같은 분이 만든 archhub-mcp(MIT) 공개 서버를 씁니다. 바룩에서 남이 만든 것은 이 두 서버뿐입니다. 초안을 워드 파일로 열어 직접 고치는 기능은 pblsketch가 만든 [이음오피스](https://github.com/pblsketch/ieumoffice)(Apache-2.0)를 쓰는데, 바룩에 들어 있지 않고 쓰는 분이 따로 깝니다.

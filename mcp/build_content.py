@@ -33,6 +33,9 @@ g("sinmungo", "국민신문고로 질의하고 신청하기", "skills/nonprofit-
 g("admin-affairs", "관청에 내는 일 — 영역과 고르는 법", "skills/admin-affairs/SKILL.md")
 g("judicial-affairs", "법원·등기소에 내는 일 — 영역과 고르는 법", "skills/judicial-affairs/SKILL.md")
 g("nonprofit", "비영리 사단법인 설립과 기부금영수증 — 전체 순서", "skills/nonprofit-incorporation/SKILL.md")
+guides["office"] = {"title": "직접 고칠 워드 파일로 주기 — 이음오피스가 함께 연결되어 있을 때",
+    "text": "대화창에서는 `ieumoffice …` 명령어 대신 **이음오피스 연결 도구**(`create_docx`, `docs_read`, `convert`, `hwp_read`)를 쓴다. 그 도구가 대화에 없으면 이 방법을 쓰지 않는다. 폴더 이름(`업무/…`, `고치기/`)은 대화창에서는 해당이 없고, 원본은 이 대화에서 쓴 초안이다.\n\n---\n\n"
+    + strip_front((ROOT / "skills/office-doc/SKILL.md").read_text(encoding="utf-8"))}
 CHAT_BUILDING = ("대화창에서는 `arch.py` 대신 **`building_lookup` 도구**를 쓴다. what에 profile · history · floors · temp 가운데 하나를 넣는다. "
                  "동 단위 통계 같은 다른 조회와 원본 행(`raw`)은 대화창에서 되지 않는다. 아래에서 `arch.py …`라고 적힌 곳은 그 도구로 읽는다.\n\n---\n\n")
 CHAT_DRAWING = ("대화창에서는 `draw.py` 대신 **`drawing_example`과 `drawing_make` 도구**를 쓴다. 보기 내용을 받아 신청인의 값으로 바꾼 뒤 `drawing_make`의 spec으로 넘기면 SVG가 온다. "
