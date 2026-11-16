@@ -51,6 +51,7 @@ for f in sorted((ROOT / "skills/nonprofit-incorporation/references").glob("*.md"
     if f.stem in ("보완-예방", "국민신문고"):
         continue
     g("nonprofit/" + f.stem, "비영리 사단법인 — " + f.stem.replace("-", " "), str(f.relative_to(ROOT)))
+g("forms", "관청 서식 목록 — 업무별 서식 번호와 원본을 받는 누리집 주소", "skills/office-doc/references/서식-목록.md")
 cc = strip_front((ROOT / "skills/cross-check/SKILL.md").read_text(encoding="utf-8"))
 sh = strip_front((ROOT / "agents/shaphan.md").read_text(encoding="utf-8"))
 na = strip_front((ROOT / "agents/nathan.md").read_text(encoding="utf-8"))
