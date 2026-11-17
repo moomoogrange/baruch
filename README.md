@@ -116,6 +116,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 | `/baruch:status` | 진행 상황, 기한, 접수번호와 회신 기록 |
 | `/baruch:law 민법 32` | 법령 조회 |
 | `/baruch:drawing 컨테이너 창고 배치도` | 도면 그리기. 말해 준 치수로 배치도·평면도·현황도를 그려 A4 PDF로 만듭니다 |
+| `/baruch:seal 주식회사 한빛 법인 도장` | 도장 그림 만들기. 이름이나 단체 이름으로 서류에 얹을 도장 그림(바탕이 투명한 PNG)을 만듭니다. 등록된 인감을 찍어야 하는 서류에는 쓰지 않습니다 |
 | `/baruch:building 광진구 자양동 2-2` | 건축물 조회. 주소로 건축물대장의 용도·면적·사용승인일, 인허가 연혁, 가설건축물 존치기간을 읽습니다 |
 
 만든 파일은 `업무/<업무 이름>/` 아래에 쌓입니다.
@@ -235,7 +236,7 @@ Claude Code에 두 줄을 입력해 설치합니다.
 ```
 .claude-plugin/     플러그인·마켓플레이스 정의
 agents/             baruch, shaphan, nathan
-commands/           work, case, precheck, check, pdf, docx, form, registry-check, status, law, building, drawing,
+commands/           work, case, precheck, check, pdf, docx, form, registry-check, status, law, building, drawing, seal,
                     start, sinmungo-ask, docs, sinmungo-apply, registry, tax (비영리 사단법인)
 mcp/                Claude·ChatGPT 연결 서버 (api/mcp.js, 도면 함수 api/drawing.py, 대화창용 규칙, 배포 스크립트)
 docs/               소개 쪽
@@ -248,6 +249,7 @@ skills/
   office-doc/               직접 고칠 워드 파일 만들기와 다시 읽기 (이음오피스), 관청 서식과 등기소 양식 원본 받기 (scripts/forms.py), 서식 목록
   building-lookup/          건축물대장·인허가 조회 (scripts/arch.py)
   site-drawing/             배치도·평면도·현황도 (scripts/draw.py), 필지 경계와 대장 면적 (parcel.py), 바탕 지도 (basemap.py), 경사 참고도 (slope.py)
+  seal-maker/               서류에 얹을 도장 그림 만들기 (scripts/seal.py)
   nonprofit-incorporation/  비영리 사단법인 설립 (references/, templates/)
   registry-check/           등기 신청 사전 점검 (선행 신고·허가, 신청서 대조)
   cross-check/              상호 검토 절차
